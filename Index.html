@@ -2,600 +2,238 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Alley Wars RPG (Offline HoboWars Edition)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Alley Wars v2 (Offline RPG)</title>
 <style>
-￼ { box-sizing: border-box; }
-body { margin: 0; padding-bottom: 60px; background: #121212; color: #e0e0e0; font: 14px/1.4 Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-a { color: #64b5f6; cursor: pointer; text-decoration: none; }
-a:hover { text-decoration: underline; }
-a.x { color: #777; pointer-events: none; text-decoration: none; }
-#top { position: sticky; top: 0; background: #1e1e1e; border-bottom: 2px solid #333; padding: 6px; font-size: 12px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-#top table { width: 100%; border-collapse: collapse; }
-#top td { vertical-align: top; padding: 2px 4px; }
-.bar { height: 8px; border: 1px solid #444; background: #222; margin: 2px 0; border-radius: 4px; overflow: hidden; }
-.bar i { display: block; height: 100%; transition: width 0.3s ease; }
-#c { padding: 10px; max-width: 800px; margin: auto; }
-h2 { font-size: 18px; margin: 10px 0 6px 0; border-bottom: 1px solid #444; padding-bottom: 4px; color: #ffb74d; }
-h3 { font-size: 15px; margin: 8px 0 4px 0; color: #81c784; }
-.box { background: #1e1e1e; border: 1px solid #333; padding: 8px; margin: 8px 0; border-radius: 4px; }
-.col { display: flex; flex-wrap: wrap; gap: 12px; }
-.col > div { flex: 1; min-width: 160px; }
-table.t { border-collapse: collapse; width: 100%; font-size: 12px; margin: 6px 0; }
-.t td, .t th { border: 1px solid #333; padding: 5px; text-align: left; }
-.t th { background: #2a2a2a; color: #ffb74d; }
-.t tr:nth-child(even) { background: #181818; }
-button, input, select { font: inherit; padding: 5px 9px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 3px; }
-button:active { background: #444; }
-.g { color: #81c784; }
-.r { color: #e57373; }
-.m { color: #9e9e9e; font-size: 11px; }
-.gold { color: #ffd54f; }
-/* Mobile Grid Exploration Map */
-.grid-map { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; max-width: 320px; margin: 10px auto; }
-.grid-cell { aspect-ratio: 1; background: #262626; border: 1px solid #3a3a3a; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border-radius: 6px; user-select: none; }
-.grid-cell.center { background: #e57373; color: #fff; font-weight: bold; }
-.grid-cell.visited { background: #2e4c2e; }
-.grid-cell:active { background: #444; }
-.log { max-height: 220px; overflow-y: auto; font: 12px/1.3 monospace; background: #0a0a0a; padding: 6px; border: 1px solid #222; border-radius: 3px; }
-/* Persistent Mobile Bottom Bar */
-#bot-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 50px; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-#bot-nav button { flex: 1; height: 100%; border: none; background: transparent; color: #aaa; font-size: 11px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2px; }
-#bot-nav button.active { color: #ffb74d; font-weight: bold; }
-#bot-nav button span { font-size: 16px; margin-bottom: 2px; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding-bottom: 70px; background: #121212; color: #e0e0e0; font: 14px/1.4 -apple-system, BlinkMacSystemFont, Verdana, sans-serif; }
+  a { color: #64b5f6; cursor: pointer; text-decoration: none; }
+  #top { position: sticky; top: 0; background: #1e1e1e; border-bottom: 2px solid #333; padding: 6px 10px; font-size: 12px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+  #top table { width: 100%; border-collapse: collapse; }
+  #top td { vertical-align: top; padding: 2px 4px; }
+  .bar { height: 8px; border: 1px solid #444; background: #222; margin: 2px 0; border-radius: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; transition: width 0.2s; }
+  #c { padding: 12px; max-width: 600px; margin: auto; }
+  h2 { font-size: 18px; margin: 10px 0 6px; border-bottom: 1px solid #444; color: #fff; padding-bottom: 4px; }
+  .box { background: #1e1e1e; border: 1px solid #333; padding: 10px; margin: 8px 0; border-radius: 6px; }
+  .col { display: flex; flex-wrap: wrap; gap: 10px; }
+  .col > div { flex: 1; min-width: 140px; }
+  table.t { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0; }
+  .t td, .t th { border: 1px solid #333; padding: 6px; text-align: left; }
+  .t th { background: #252525; }
+  button, input, select { font: inherit; padding: 6px 10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px; margin: 2px 0; }
+  button:active { background: #444; }
+  .g { color: #81c784; } .r { color: #e57373; } .m { color: #999; font-size: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; max-width: 330px; margin: 10px auto; }
+  .grid i { aspect-ratio: 1; background: #2a2a2a; font-style: normal; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
+  .grid i.v { background: #2e7d32; } .grid i.p { background: #c62828; color: #fff; font-weight: bold; }
+  .log { max-height: 220px; overflow-y: auto; font: 12px/1.3 monospace; background: #0a0a0a; padding: 8px; border-radius: 4px; border: 1px solid #222; }
+  
+  /* Mobile Bottom Navigation Bar */
+  #bnav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; font-size: 11px; flex: 1; height: 100%; text-decoration: none; }
+  .nav-item.active { color: #64b5f6; font-weight: bold; }
+  .nav-icon { font-size: 18px; margin-bottom: 2px; }
+  
+  #err-log { position: fixed; top: 0; left: 0; right: 0; background: #b71c1c; color: white; padding: 8px; font-size: 12px; z-index: 9999; display: none; }
 </style>
 </head>
 <body>
+
+<div id="err-log"></div>
 <div id="top"></div>
 <div id="c"></div>
-<div id="bot-nav">
-<button data-a="go" data-v="home"><span>🏠</span>Home</button>
-<button data-a="go" data-v="pack"><span>🎒</span>Backpack</button>
-<button data-a="go" data-v="city"><span>🏙️</span>City Map</button>
-<button data-a="go" data-v="fight"><span>👊</span>Fight</button>
-<button data-a="go" data-v="chat"><span>💬</span>Gang Chat</button>
+
+<!-- Mobile Persistent Bottom Navigation Bar -->
+<div id="bnav">
+  <a class="nav-item" data-a="go" data-v="home"><span class="nav-icon">🏠</span>Home</a>
+  <a class="nav-item" data-a="go" data-v="pack"><span class="nav-icon">🎒</span>Backpack</a>
+  <a class="nav-item" data-a="go" data-v="city"><span class="nav-icon">🏙️</span>City Map</a>
+  <a class="nav-item" data-a="go" data-v="fight"><span class="nav-icon">👊</span>Fight</a>
+  <a class="nav-item" data-a="go" data-v="chat"><span class="nav-icon">💬</span>Gang Chat</a>
 </div>
+
 <script>
 'use strict';
-/* ===== CONFIG & DATA ===== */
-const CONFIG = {
-KEY: 'alleywars_v3',
-VER: 3,
-presets: { classic: { regen: 900, reset: 86400, turns: 100 }, relaxed: { regen: 60, reset: 1800, turns: 100 }, accelerated: { regen: 10, reset: 300, turns: 200 } },
-fightT: 5, begT: 10, mapCost: 10, pop: 300, gridN: 100
+
+// Global Safety Error Handler
+window.onerror = function(msg, url, lineNo) {
+  var err = document.getElementById('err-log');
+  if(err) {
+    err.style.display = 'block';
+    err.innerHTML = '<b>JS Runtime Error:</b> ' + msg + ' (Line ' + lineNo + ')';
+  }
+  return false;
 };
-const G = (n, k, v, p, lv, d, x) => ({ n, k, v, p, lv, d, x: x || '' });
-const GEAR = {
-stick: G('Sturdy Stick', 'wep', 3, 30, 1, '+3 damage.'), pipe: G('Lead Pipe', 'wep', 10, 300, 3, '+10 damage.'),
-hammer: G('Claw Hammer', 'wep', 18, 900, 6, '+18 damage.'), bat: G('Spiked Bat', 'wep', 30, 2500, 10, '+30 damage.'),
-machete: G('Rusty Machete', 'wep', 55, 9000, 16, '+55 damage.'), chain: G('Chain Whip', 'wep', 90, 30000, 24, '+90 damage.'),
-nail: G('Nail Gun Club', 'wep', 140, 90000, 35, '+140 damage.'), katana: G('Pawnshop Katana', 'wep', 220, 300000, 50, '+220 damage.'),
-laser: G('Dumpster Laser', 'wep', 350, 750000, 65, '+350 damage.'),
-rag: G('Padded Rags', 'arm', 2, 30, 1, '+2 defense.'), vest: G('Cardboard Vest', 'arm', 8, 300, 3, '+8 defense.'),
-hubcap: G('Hubcap Plate', 'arm', 16, 1200, 7, '+16 defense.'), plate: G('Trash-lid Shield', 'arm', 25, 2500, 10, '+25 defense.'),
-riot: G('Riot Gear', 'arm', 45, 9000, 16, '+45 defense.'), kevlar: G('Kevlar Rag', 'arm', 80, 30000, 26, '+80 defense.'),
-scrap: G('Scrap Plate Suit', 'arm', 130, 90000, 38, '+130 defense.'), titan: G('Titanium Coat', 'arm', 200, 300000, 50, '+200 defense.'),
-exo: G('Cardboard Exosuit', 'arm', 320, 750000, 65, '+320 defense.'),
-tin: G('Tin Ring', 'ring', 1, 100, 1, '+5% EXP.', 'exp'), brass: G('Brass Ring', 'ring', 2, 1000, 5, '+10% EXP.', 'exp'),
-silver: G('Silver Ring', 'ring', 4, 10000, 15, '+20% EXP.', 'exp'), bring: G('Beggar Ring', 'ring', 2, 5000, 8, '+10% begging cash.', 'beg')
-};
-const PACK = [[500, 1], [2500, 5], [10000, 10], [50000, 20], [250000, 40], [1000000, 60]];
-const CLOTH = {
-beanie: { n: 'Red Beanie', k: 'hat', p: 0, c: '#a22' }, cap: { n: 'Blue Cap', k: 'hat', p: 200, c: '#25a' }, tophat: { n: 'Top Hat', k: 'hat', p: 40, u: 'P', c: '#222' }, crown: { n: 'Paper Crown', k: 'hat', p: 5000, c: '#eb3' },
-jacketG: { n: 'Green Jacket', k: 'top', p: 0, c: '#4a8a3a' }, hoodie: { n: 'Grey Hoodie', k: 'top', p: 300, c: '#889' }, suit: { n: 'Thrift Suit', k: 'top', p: 25, u: 'P', c: '#345' }, tux: { n: 'Fancy Tux', k: 'top', p: 80, u: 'P', d: 1, c: '#111' },
-jeans: { n: 'Blue Jeans', k: 'pants', p: 0, c: '#3b6fb0' }, cargo: { n: 'Cargo Pants', k: 'pants', p: 250, c: '#675' }, gold: { n: 'Gold Slacks', k: 'pants', p: 60, u: 'P', c: '#d4a' },
-glasses: { n: 'Round Glasses', k: 'acc', p: 150, c: '#222' }, scarf: { n: 'Woolly Scarf', k: 'acc', p: 300, c: '#c52' }, chain: { n: 'Gold Chain', k: 'acc', p: 50, u: 'P', c: '#eb3' }, shades: { n: 'Shades', k: 'acc', p: 30, u: 'P', c: '#000' }
-};
-const SKIN = ['#f2d0b0', '#e9b98f', '#c68c5c', '#8d5a38', '#5a3a24'], HAIRC = ['#222', '#5a3a1a', '#b8862e', '#c33', '#999'];
-const RATS = {
-sewer: { n: 'Sewer Rat', p: 200, lv: 1, st: [1, 1, 1], d: 'Common and scrappy.' }, brown: { n: 'Brown Rat', p: 1500, lv: 5, st: [3, 3, 3], d: 'Quick learner.' },
-black: { n: 'Black Rat', p: 8000, lv: 12, st: [8, 8, 8], d: 'Bites hard.' }, albino: { n: 'Albino Rat', p: 40000, lv: 25, st: [18, 18, 18], d: 'Rare & fast.' },
-dire: { n: 'Dire Rat', p: 200000, lv: 40, st: [40, 40, 40], d: 'Absurdly huge.' }
-};
-const RN = ['Squeaks', 'Nibbles', 'Gus', 'Fang', 'Biscuit', 'Whiskers', 'Rizzo', 'Sewer Pete', 'Bitey', 'Shadow'];
-const CARTS = [
-{ id: 'c1', n: 'Rusty Grocery Cart', p: 100, spd: 5, d: 'Basic rust bucket' },
-{ id: 'c2', n: 'Turbo Shopping Cart', p: 1200, spd: 15, d: 'Greased bearings' },
-{ id: 'c3', n: 'Rocket Dumpster Cart', p: 15000, spd: 35, d: 'Equipped with fireworks' }
-];
-const DRINKS = [
-{ id: 'beer', n: 'Cheap Beer', p: 15, alc: 15, hp: 10, d: '+10 HP, +15% Drunk' },
-{ id: 'fortified', n: 'Fortified Wine', p: 50, alc: 35, hp: 30, d: '+30 HP, +35% Drunk' },
-{ id: 'moonshine', n: 'Alley Moonshine', p: 150, alc: 60, hp: 70, d: '+70 HP, +60% Drunk' }
-];
-const TATTOOS = [
-{ id: 't1', n: 'Anchor Tattoo', p: 500, d: '+2 Strength', b: { str: 2 } },
-{ id: 't2', n: 'Flame Sleeve', p: 2500, d: '+5 Power', b: { pow: 5 } },
-{ id: 't3', n: 'Lightning Bolt', p: 10000, d: '+10 Speed', b: { spd: 10 } }
-];
-const SKILLS = [
-{ id: 'beg1', n: 'Street Charm', cost: 1000, d: '+15% begging cash' },
-{ id: 'fght1', n: 'Dirty Fighting', cost: 2500, d: '+10% Combat Damage' },
-{ id: 'scav1', n: 'Eagle Eye', cost: 5000, d: 'Find 25% more cans' }
-];
-const ACHIEVEMENTS = [
-{ id: 'a1', n: 'First Steps', d: 'Take 10 exploration steps', ok: s => s.ct.steps >= 10, r: 100 },
-{ id: 'a2', n: 'Brawl Beginner', d: 'Win 5 fights', ok: s => s.bat.w >= 5, r: 500 },
-{ id: 'a3', n: 'Can Tycoon', d: 'Sell 100 cans', ok: s => s.ct.sold >= 100, r: 1000 },
-{ id: 'a4', n: 'Happily Married', d: 'Get married to a fellow hobo', ok: s => !!s.spouse, r: 2500 },
-{ id: 'a5', n: 'Warlord', d: 'Win a gang territory war', ok: s => s.war.w >= 1, r: 5000 }
-];
-const BEG_TIERS = [
-{ name: 'Cardboard Sign', min: 0, mult: 1.0 },
-{ name: 'Cup & Shake', min: 10, mult: 1.5 },
-{ name: 'Sad Backstory', min: 25, mult: 2.2 },
-{ name: 'Street Performance', min: 50, mult: 3.5 },
-{ name: 'Urban Legend', min: 100, mult: 5.5 }
-];
-const DISTRICTS = {
-N: { n: 'North Side', c: '#a3a', gang: 1, bonus: ' +10% Train Exp' },
-W: { n: 'West Side', c: '#55d', gang: 2, bonus: ' +15% Begging Payout' },
-E: { n: 'East Side', c: '#d22', gang: 3, bonus: ' +10% Combat Power' },
-S: { n: 'South Side', c: '#2a2', gang: 4, bonus: ' +20% Can Depot Sales' }
-};
-const PERS = ['competitive', 'casual', 'joker', 'veteran', 'beginner', 'collector', 'leader', 'trash-talker', 'helpful', 'quiet', 'social', 'romantic'];
-const STYLES = ['fighter', 'beggar', 'trainer', 'explorer'];
-const GN = [
-['Rust Belt Rats', 'rail-yard scrappers'], ['Dumpster Dynasty', 'dumpster-diving clan'],
-['Cart Kings', 'shopping cart racers'], ['Midnight Mutts', 'night owls'],
-['The Bottle Brigade', 'recyclers turned enforcers'], ['Tin Can Syndicate', 'can tycoons']
-];
-const GCOL = ['#a52', '#385', '#c80', '#336', '#2a7', '#778'];
-const FN = 'Dex Mara Jonas Lena Otis Pearl Ruben Tilda Cal Nell Gus Vera Moe Ida Hank Rosa Abe Faye Lou Wren Ned Opal Sid Tess Bo Cora Walt Dot Finn Edie'.split(' ');
-const LN = 'Ravenhurst Mudge Pike Okafor Brandt Quill Sorensen Dabrowski Tamm Hollis Vance Ng Ferreira Lund Abbott Kessler Rowe Imani Castellan Boggs Yoder Marlow Pruitt Santos'.split(' ');
-/* ===== STATE & HELPER UTILS ===== */
-const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
-const rf = (a, b) => a + Math.random() * (b - a);
-const need = l => Math.round(56 * Math.pow(l, 1.6));
-const mhpOf = l => 20 + (l - 1) * 10;
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' }[c]));
-const f2 = n => (+n).toFixed(2);
-const money = n => '$' + Math.floor(n).toLocaleString();
-const pk = a => a[rnd(0, a.length - 1)];
-function pname() {
-return Math.random() < 0.5 ? pk(FN) + ' ' + pk(LN) : pk(FN) + ' ' + pk(LN).slice(0, 3) + rnd(1, 99);
+
+const CONFIG = { KEY: 'alleywars_v2', VER: 2, pop: 100, gridN: 100 };
+
+function newState(name) {
+  return {
+    v: CONFIG.VER,
+    name: name || 'Hobo',
+    lv: 1, xp: 0, cash: 50, bank: 100, pts: 5, tok: 100,
+    hp: 20, maxHp: 20, T: 100, turns: 100, cans: 0,
+    spd: 2, pow: 2, str: 2, int: 2, beg: 1.0,
+    pos: { x: 50, y: 50 },
+    inv: {}, eq: { wep: null, arm: null },
+    visited: [], finds: [], log: []
+  };
 }
-function newState(n) {
-const t = Date.now(), P = CONFIG.presets.relaxed;
-const st = {
-v: CONFIG.VER, name: n, pack: 0, cages: 1, rats: [], rat: 0, don: 0, donP: false, donOn: 0, donLog: [],
-gang: 0, gRank: '', gangs: [], chat: [], evq: [], pms: {}, wardrobe: {}, app: { skin: 1, hair: 1, hairc: 1, beard: 1, hat: '', top: 'jacketG', pants: 'jeans', acc: '' },
-armory: {}, war: { w: 0, l: 0 }, invites: [], lastChat: 0, id: rnd(1e6, 9e6), lv: 1, xp: 0, cash: 50, bank: 100, pts: 10, tok: 500, hp: 20, T: 100, meals: 5,
-tref: 0, ptr: 0, tokref: 0, cans: 0, int: 2, beg: 2.4, resp: 0, spd: 2, pow: 2, str: 2, drunk: 0, eq: { wep: null, arm: null, ring: null }, inv: {}, food: {},
-map: true, trolly: true, gift: true, skip: false, quests: {}, school: {}, pos: { x: 50, y: 50 }, turns: P.turns, visited: [], finds: [], sales: [], tx: [],
-bat: { w: 0, l: 0, lw: null, ll: null }, ct: { steps: 0, trains: 0, begs: 0, sold: 0 }, rk: { cur: 0, prev: 0 },
-cart: 'c1', cartWin: 0, cartLoss: 0, spouse: null, rels: {}, tattoos: [], skills: [], wishes: [], achievements: {}, districts: { ...DISTRICTS },
-set: { pace: 'relaxed', sim: 1, sandbox: false, protect: true, unl: false, chat: 1, cheat: { hp: false, T: false, meals: false, free: false, reqs: false, stats: false } },
-rt: { rg: t, rs: t, sim: t }, log: [], feed: [], mail: 1, players: genPop()
-};
-st.gangs = genGangs(st.players);
-return st;
+
+let S = null;
+let view = 'home';
+let note = '';
+
+function save() {
+  try { localStorage.setItem(CONFIG.KEY, JSON.stringify(S)); } catch(e){}
 }
-let S = null, view = 'home', note = '', memOnly = false;
-function lg(m, c) { S.log.unshift({ t: new Date().toLocaleTimeString(), m, c: c || '' }); S.log.length = Math.min(S.log.length, 150); }
-function save() { try { localStorage.setItem(CONFIG.KEY, JSON.stringify(S)); } catch (e) { memOnly = true; } }
+
 function load() {
-let raw = null; try { raw = localStorage.getItem(CONFIG.KEY); } catch (e) { memOnly = true; }
-if (!raw) return;
-try { S = JSON.parse(raw); tick(); } catch (e) { console.error("Save load error", e); }
+  try {
+    var raw = localStorage.getItem(CONFIG.KEY);
+    if(raw) S = JSON.parse(raw);
+  } catch(e){}
+  if(!S) S = newState('Hobo');
 }
-function genGangs(P) {
-const G2 = GN.map((g, i) => ({
-id: i + 1, n: g[0], c: GCOL[i], th: g[1], lv: rnd(2, 14), xp: rnd(0, 500), tr: rnd(5000, 50000), min: 1, rv: 0, wins: rnd(0, 30), loss: rnd(0, 30), lead: 0, me: false, feed: [], hist: 'Founded recently.'
-}));
-G2.forEach((g, i) => g.rv = G2[(i + 1) % G2.length].id);
-P.forEach(p => { p.gang = 0; p.gr = ''; });
-G2.forEach(g => {
-const l = P.find(p => !p.gang);
-if (l) { l.gang = g.id; g.lead = l.id; }
-});
-P.forEach(p => { if (!p.gang && Math.random() < 0.4) p.gang = pk(G2).id; });
-return G2;
-}
-function genPop() {
-const P = [];
-for (let i = 0; i < CONFIG.pop; i++) {
-const L2 = rnd(1, 40);
-P.push({
-id: 100000 + i, n: pname(), age: rnd(18, 45), sx: pk(['M', 'F']), pers: pk(PERS), style: pk(STYLES), app: { skin: rnd(0, 4), hair: rnd(0, 3), hairc: rnd(0, 4), beard: rnd(0, 2) },
-gang: 0, gr: '', lv: L2, xp: 0, spd: rf(1, L2 * 2), pow: rf(1, L2 * 2), str: rf(1, L2 * 2), wp: rnd(0, L2 * 3), ar: rnd(0, L2 * 2), cash: rnd(10, L2 * 50),
-w: rnd(0, 20), l: rnd(0, 20), act: Date.now(), mem: { win: 0, loss: 0 }, hist: []
-});
-}
-return P;
-}
-/* ===== CORE GAME ENGINE & ACTIONS ===== */
-function tick() {
-if (!S) return;
-const n = Date.now(), p = CONFIG.presets[S.set.pace];
-if (S.T < 100) {
-const c = Math.floor((n - S.rt.rg) / (p.regen * 1000));
-if (c > 0) { S.T = Math.min(100, S.T + 5 * c); S.rt.rg = n; }
-}
-if (S.drunk > 0) S.drunk = Math.max(0, S.drunk - 1);
-simRun(n);
-checkAchievements();
-}
-function checkAchievements() {
-ACHIEVEMENTS.forEach(a => {
-if (!S.achievements[a.id] && a.ok(S)) {
-S.achievements[a.id] = true;
-S.cash += a.r;
-lg(⁠ACHIEVEMENT UNLOCKED: ${a.n} (+$${a.r})!⁠, 'g');
-}
-});
-}
-function simRun(n) {
-if (!S.set.sim) return;
-// Dynamic NPC progression
-S.players.forEach(p => {
-if (Math.random() < 0.05) {
-p.lv += 1;
-p.spd += rf(0.5, 1.5);
-p.pow += rf(0.5, 1.5);
-p.str += rf(0.5, 1.5);
-p.cash += rnd(10, 100);
-}
-});
-}
-const cz = k => !!(S && S.set.sandbox && S.set.cheat && S.set.cheat[k]);
-const gangOf = () => S.gangs.find(g => g.id === S.gang);
-const A = {
-create(n) { n = String(n).trim().slice(0, 20); if (!n) return 'Enter name.'; S = newState(n); lg('Welcome, ' + n); return 'Character created.'; },
-go(v) { scrollToTop(); view = v; return ''; },
-moveCell(dx, dy) {
-if (S.turns <= 0 && !S.set.unl) return 'No explore turns left!';
-if (!S.set.unl) S.turns--;
-S.ct.steps++;
-S.pos.x = Math.max(0, Math.min(99, S.pos.x + dx));
-S.pos.y = Math.max(0, Math.min(99, S.pos.y + dy));
-const k = S.pos.x * 100 + S.pos.y;
-if (!S.visited.includes(k)) S.visited.push(k);
-const r = Math.random();
-let res = 'Scoured the area... found nothing.';
-if (r < 0.4) { const c = rnd(5, 25); S.cash += c; res = ⁠Found $${c} on the curb!⁠; }
-else if (r < 0.7) { const cans = rnd(2, 8); S.cans += cans; res = ⁠Found ${cans} empty cans!⁠; }
-else if (r < 0.85) { const p = rnd(1, 2); S.pts += p; res = ⁠Found ${p} Shiny Point!⁠; }
-S.finds.unshift({ t: new Date().toLocaleTimeString(), m: res });
-return res;
-},
-fight(id) {
-const o = S.players.find(p => p.id === +id);
-if (!o) return 'Opponent missing.';
-if (S.T < 5 && !cz('T')) return 'Need 5 Awake!';
-if (!cz('T')) S.T -= 5;
-const myPow = S.pow + S.str + S.spd + (S.eq.wep ? GEAR[S.eq.wep].v : 0) + (S.tattoos.length * 5);
-const opPow = o.pow + o.str + o.spd + o.wp;
-if (myPow >= opPow || cz('hp')) {
-S.bat.w++; S.cash += o.cash; o.cash = 0; S.xp += 20;
-lg(⁠Victory against ${o.n}! Looted cash and gained 20 XP.⁠, 'g');
-return ⁠Won fight against ${o.n}!⁠;
-} else {
-S.bat.l++; S.hp = 0;
-lg(⁠Defeated by ${o.n}. You passed out!⁠, 'r');
-return ⁠Lost fight to ${o.n}.⁠;
-}
-},
-heal() {
-const mx = mhpOf(S.lv);
-if (S.hp >= mx) return 'Already full health!';
-const c = Math.ceil(mx - S.hp);
-if (S.cash < c && !cz('free')) return 'Need $' + c;
-if (!cz('free')) S.cash -= c;
-S.hp = mx;
-return 'Fully healed!';
-},
-beg() {
-if (S.T < 5 && !cz('T')) return 'Need 5 Awake!';
-if (!cz('T')) S.T -= 5;
-S.ct.begs++;
-const tier = BEG_TIERS.slice().reverse().find(t => S.beg >= t.min) || BEG_TIERS[0];
-let amt = Math.round((rnd(5, 15) + S.int * 2) * tier.mult);
-if (S.skills.includes('beg1')) amt = Math.round(amt * 1.15);
-S.cash += amt;
-S.beg += 0.1;
-lg(⁠Begged on the street corner (${tier.name}): earned $${amt}⁠, 'g');
-return ⁠Earned $${amt} cash!⁠;
-},
-sellCans() {
-if (S.cans <= 0) return 'No cans to sell!';
-const val = S.cans * 2;
-S.cash += val;
-S.ct.sold += S.cans;
-lg(⁠Sold ${S.cans} cans for $${val}⁠, 'g');
-S.cans = 0;
-return ⁠Earned $${val}!⁠;
-},
-buy(id) {
-const item = GEAR[id] || DRINKS.find(d => d.id === id) || CARTS.find(c => c.id === id);
-if (!item) return 'Unknown item.';
-if (S.cash < item.p && !cz('free')) return 'Not enough cash.';
-if (!cz('free')) S.cash -= item.p;
-if (GEAR[id]) S.inv[id] = (S.inv[id] || 0) + 1;
-if (DRINKS.find(d => d.id === id)) { S.drunk = Math.min(100, S.drunk + item.alc); S.hp = Math.min(mhpOf(S.lv), S.hp + item.hp); }
-if (CARTS.find(c => c.id === id)) { S.cart = id; }
-return ⁠Bought ${item.n}!⁠;
-},
-equip(id) { if (S.inv[id]) { S.eq[GEAR[id].k] = id; return 'Equipped ' + GEAR[id].n; } return 'Not owned.'; },
-mkGang() {
-const name = String(document.getElementById('gname').value).trim();
-if (!name) return 'Enter gang name.';
-if (S.cash < 1000 && !cz('free')) return 'Founding costs $1,000.';
-if (!cz('free')) S.cash -= 1000;
-const id = S.gangs.length + 1;
-const ng = { id, n: name, c: '#ffb74d', th: 'Player Founded Gang', lv: 1, xp: 0, tr: 0, min: 1, rv: 1, wins: 0, loss: 0, lead: S.id, me: true, feed: [], hist: 'Founded recently' };
-S.gangs.push(ng);
-S.gang = id;
-S.gRank = 'Leader';
-return 'Gang created successfully!';
-},
-leaveGang() {
-if (!S.gang) return 'Not in a gang.';
-const g = gangOf();
-if (g && g.me) {
-S.gangs = S.gangs.filter(x => x.id !== g.id);
-}
-S.gang = 0; S.gRank = '';
-return 'Left the gang.';
-},
-declareWar(distKey) {
-const dist = S.districts[distKey];
-if (!dist) return 'Invalid district.';
-if (!S.gang) return 'Must be in a gang to declare war!';
-const myG = gangOf();
-const defenderG = S.gangs.find(g => g.id === dist.gang);
-const myPower = myG ? myG.lv * 20 + S.lv * 5 : S.lv * 5;
-const defPower = defenderG ? defenderG.lv * 25 : 10;
-if (myPower > defPower) {
-dist.gang = S.gang;
-S.war.w++;
-lg(⁠WAR VICTORY! Your gang captured ${dist.n}!⁠, 'g');
-return ⁠Captured ${dist.n}!⁠;
-} else {
-S.war.l++;
-lg(⁠WAR DEFEAT! Failed to capture ${dist.n}.⁠, 'r');
-return ⁠War lost against ${dist.n} defenders.⁠;
-}
-},
-raceCart() {
-if (S.T < 10 && !cz('T')) return 'Need 10 Awake!';
-if (!cz('T')) S.T -= 10;
-const myCart = CARTS.find(c => c.id === S.cart) || CARTS[0];
-const win = Math.random() * 50 < myCart.spd;
-if (win) {
-S.cartWin++; S.cash += 150;
-return ⁠RACE WIN! Won $150 with your ${myCart.n}!⁠;
-} else {
-S.cartLoss++;
-return 'Race lost... upgrade your cart!';
-}
-},
-propose(id) {
-const p = S.players.find(x => x.id === +id);
-if (!p) return 'Hobo not found.';
-if (S.spouse) return 'Already married!';
-if (p.lv >= 5) {
-S.spouse = p.id;
-lg(⁠MARRIED! You are now married to ${p.n}. Enjoy +20% EXP boost!⁠, 'g');
-return ⁠Proposed & Married to ${p.n}!⁠;
-} else {
-return ⁠${p.n} rejected your proposal! (Requires Lv 5)⁠;
-}
-},
-buyTattoo(id) {
-const t = TATTOOS.find(x => x.id === id);
-if (!t) return 'Invalid tattoo.';
-if (S.tattoos.includes(id)) return 'Already owned!';
-if (S.cash < t.p && !cz('free')) return 'Not enough cash.';
-if (!cz('free')) S.cash -= t.p;
-S.tattoos.push(id);
-if (t.b.str) S.str += t.b.str;
-if (t.b.pow) S.pow += t.b.pow;
-if (t.b.spd) S.spd += t.b.spd;
-return ⁠Inked with ${t.n}!⁠;
-},
-learnSkill(id) {
-const sk = SKILLS.find(x => x.id === id);
-if (!sk) return 'Invalid skill.';
-if (S.skills.includes(id)) return 'Already learned!';
-if (S.cash < sk.cost && !cz('free')) return 'Not enough cash.';
-if (!cz('free')) S.cash -= sk.cost;
-S.skills.push(id);
-return ⁠Learned skill: ${sk.n}!⁠;
-},
-makeWish(w) {
-if (S.pts < 5 && !cz('free')) return 'Wishes cost 5 Points!';
-if (!cz('free')) S.pts -= 5;
-if (w === 'cash') { S.cash += 5000; return 'Wish granted: +$5,000 cash!'; }
-if (w === 'awake') { S.T = 100; return 'Wish granted: Max Awake restored!'; }
-if (w === 'stat') { S.str += 5; S.pow += 5; return 'Wish granted: Stats increased!'; }
-},
-ratFight() {
-const myRat = S.rats.find(r => r.id === S.rat);
-if (!myRat) return 'Select an active fighting rat first!';
-const win = Math.random() < 0.6;
-if (win) {
-myRat.xp += 10; S.cash += 100;
-return ⁠Rat Pit Win! ${myRat.nm} dominated! +$100⁠;
-} else {
-return ⁠Rat Pit Loss... ${myRat.nm} was defeated.⁠;
-}
-},
-sayChat() {
-const input = document.getElementById('chat-in');
-if (!input || !input.value.trim()) return '';
-const txt = input.value.trim();
-input.value = '';
-S.chat.unshift({ t: new Date().toLocaleTimeString(), w: S.name, m: txt, me: true });
-// AI Gang reply
-setTimeout(() => {
-const g = gangOf();
-if (g) {
-const replyMember = S.players.find(p => p.gang === g.id) || { n: 'Gang Mate' };
-S.chat.unshift({ t: new Date().toLocaleTimeString(), w: replyMember.n, m: ⁠Yo ${S.name}, respect! '${txt}'⁠, me: false });
-render();
-}
-}, 1000);
-return '';
-}
-};
-function scrollToTop() {
-window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-/* ===== RENDERING VIEW SYSTEM ===== */
-function topbar() {
-const mx = mhpOf(S.lv);
-document.getElementById('top').innerHTML = ⁠ <table> <tr> <td><b>${esc(S.name)}</b> (Lv ${S.lv})</td> <td style="text-align:right">💵 ${money(S.cash)} | 🏦 ${money(S.bank)} | 💎 ${S.pts} Pts</td> </tr> </table> <table> <tr> <td style="width:33%">HP: ${Math.ceil(S.hp)}/${mx} ${bar(S.hp, mx, '#e57373')}</td> <td style="width:33%">Awake: ${S.T}/100 ${bar(S.T, 100, '#81c784')}</td> <td style="width:33%">Turns: ${S.set.unl ? '∞' : S.turns} ${bar(S.turns, 100, '#64b5f6')}</td> </tr> </table>⁠;
-}
-const VIEWS = {
-home() {
-const spouseObj = S.spouse ? S.players.find(p => p.id === S.spouse) : null;
-return ⁠<div class="box"> <h2>Hobo Dashboard</h2> <p><b>Gang:</b> ${S.gang ? gangOf().n + ' (' + S.gRank + ')' : 'None'} | <b>Spouse:</b> ${spouseObj ? spouseObj.n : 'Single'}</p> <p><b>Drunk Level:</b> ${S.drunk}% | <b>Begging Tier:</b> ${(BEG_TIERS.slice().reverse().find(t => S.beg >= t.min) || BEG_TIERS[0]).name}</p> <p><b>Stats:</b> STR ${f2(S.str)} | POW ${f2(S.pow)} | SPD ${f2(S.spd)} | INT ${f2(S.int)}</p> </div> <div class="box"> <h3>Quick Actions</h3> <button data-a="beg">Corner Begging (${CONFIG.begT}T)</button> <button data-a="sellCans">Sell Cans (${S.cans})</button> <button data-a="heal">Hospital Heal</button> </div> <div class="box"> <h3>Game Log</h3> <div class="log">${S.log.map(l =>⁠<div class="${l.c}">${l.t} ${esc(l.m)}</div>⁠).join('')}</div> </div>⁠;
-},
-city() {
-return ⁠<h2>City Districts & Map</h2> <div class="col"> ${Object.keys(S.districts).map(k => { const d = S.districts[k]; const owner = S.gangs.find(g => g.id === d.gang); return⁠
-<div class="box" style="border-left: 4px solid ${d.c}">
-<b>${d.n}</b>
 
-<span class="m">Controlled by: ${owner ? esc(owner.n) : 'Neutral'}</span>
-
-<span class="g">Bonus: ${d.bonus}</span>
-
-<button data-a="declareWar" data-v="${k}">Declare Territory War</button>
-</div>`;
-}).join('')}
-</div>
-<div class="box">
-<h3>Explore the Alley (Tap Map)</h3>
-<p>Current Pos: (${S.pos.x}, ${S.pos.y}) | Turns: ${S.turns}</p>
-<div class="grid-map">
-<div class="grid-cell" data-a="moveCell" data-v="-1,-1">↖</div>
-<div class="grid-cell" data-a="moveCell" data-v="0,-1">↑</div>
-<div class="grid-cell" data-a="moveCell" data-v="1,-1">↗</div>
-<div class="grid-cell" data-a="moveCell" data-v="-1,0">←</div>
-<div class="grid-cell center">☺</div>
-<div class="grid-cell" data-a="moveCell" data-v="1,0">→</div>
-<div class="grid-cell" data-a="moveCell" data-v="-1,1">↙</div>
-<div class="grid-cell" data-a="moveCell" data-v="0,1">↓</div>
-<div class="grid-cell" data-a="moveCell" data-v="1,1">↘</div>
-</div>
-</div>
-<div class="box">
-<h3>City Hotspots</h3>
-<button data-a="go" data-v="shops">🛍️ Shops & Pawn</button>
-<button data-a="go" data-v="racing">🛒 Cart Racing</button>
-<button data-a="go" data-v="ratpit">🐀 Rat Fighting Pit</button>
-<button data-a="go" data-v="mansion">🏰 Bernard's Mansion</button>
-<button data-a="go" data-v="wishes">✨ Wishing Well</button>
-<button data-a="go" data-v="achieve">🏆 Achievements</button>
-</div>`;
-},
-fight() {
-const list = S.players.slice(0, 15);
-return ⁠<h2>Hobo Brawl Arena</h2> <div class="box"> <table class="t"> <tr><th>Hobo Name</th><th>Level</th><th>Action</th></tr> ${list.map(p =>⁠
-<tr>
-<td><b>${esc(p.n)}</b>
-<span class="m">STR ${f2(p.str)}</span></td>
-<td>Lv ${p.lv}</td>
-<td>
-<button data-a="fight" data-v="${p.id}">Attack</button>
-${!S.spouse ? ⁠<button data-a="propose" data-v="${p.id}">Marry</button>⁠ : ''}
-</td>
-</tr>⁠).join('')} </table> </div>⁠;
-},
-pack() {
-return ⁠<h2>Backpack & Gear</h2> <div class="box"> <h3>Equipped Items</h3> <p>Weapon: ${S.eq.wep ? GEAR[S.eq.wep].n : 'Fists'}</p> <p>Armor: ${S.eq.arm ? GEAR[S.eq.arm].n : 'Rags'}</p> </div> <div class="box"> <h3>Inventory Items</h3> <table class="t"> <tr><th>Item</th><th>Type</th><th>Action</th></tr> ${Object.keys(S.inv).map(k =>⁠
-<tr>
-<td>{GEAR[k].n} (x{S.inv[k]})</td>
-<td>${GEAR[k].k}</td>
-<td><button data-a="equip" data-v="${k}">Equip</button></td>
-</tr>⁠).join('')} </table> </div>⁠;
-},
-chat() {
-return ⁠<h2>Gang Headquarters & Chat</h2> <div class="box"> ${S.gang ?⁠
-<p>You belong to <b>￼{S.gRank})</p>
-<button data-a="leaveGang">Leave Gang</button>
-⁠:⁠
-<p>You are homeless and gangless!</p>
-<input id="gname" placeholder="New Gang Name">
-<button data-a="mkGang">Found Gang (￼
-`}
-￼
-￼
-￼
-￼
-${S.chat.map(c => `<div><span class="m">[{c.t}]</span> <b>${esc(c.w)}:</b> ${esc(c.m)}</div>⁠).join('')} </div> <br> <input id="chat-in" placeholder="Type message..." style="width:70%"> <button data-a="sayChat">Send</button> </div>⁠;
-},
-shops() {
-return ⁠<h2>Shops & Pawn Plaza</h2> <div class="box"> <h3>Toy Store Equipment</h3> <table class="t"> <tr><th>Item</th><th>Price</th><th>Action</th></tr> ${Object.keys(GEAR).map(k =>⁠
-<tr>
-<td>￼{GEAR[k].d})</td>
-<td>
-{d.p}</td>
-<td><button data-a="buy" data-v="${d.id}">Drink</button></td>
-</tr>⁠).join('')} </table> </div> <div class="box"> <h3>Tattoo Parlor</h3> ${TATTOOS.map(t => ⁠<button data-a="buyTattoo" data-v="${t.id}">${t.n} ({t.p}) - ${t.d}</button><br><br>`).join('')}
-￼
-￼
-￼
-${SKILLS.map(s => `<button data-a="learnSkill" data-v="${s.id}">${s.n} ({s.cost}) - ${s.d}</button>
-
-⁠).join('')} </div>⁠;
-},
-racing() {
-const curCart = CARTS.find(c => c.id === S.cart) || CARTS[0];
-return ⁠<h2>Shopping Cart Racing Ladder</h2> <div class="box"> <p>Current Cart: <b>${curCart.n}</b> (Speed: ${curCart.spd})</p> <p>Record: ${S.cartWin} Wins / ${S.cartLoss} Losses</p> <button data-a="raceCart">Enter Cart Race (10 Awake)</button> </div> <div class="box"> <h3>Upgrade Carts</h3> ${CARTS.map(c =>⁠<button data-a="buy" data-v="${c.id}">${c.n} ($${c.p}) - Speed ${c.spd}</button>
-
-⁠).join('')} </div>⁠;
-},
-ratpit() {
-return ⁠<h2>Rat Fighting Arena</h2> <div class="box"> <p>Active Rat: ${S.rat ? S.rats.find(r => r.id === S.rat).nm : 'None selected'}</p> <button data-a="ratFight">Battle Opponent Rat</button> </div> <div class="box"> <h3>Buy Rats</h3> ${Object.keys(RATS).map(k =>⁠<button data-a="buy" data-v="${k}">${RATS[k].n} ($${RATS[k].p})</button> ⁠).join('')} </div>⁠;
-},
-mansion() {
-return ⁠ <h2>Bernard's Mansion</h2> <div class="box"> <p>Bernard offers high-stakes offline quests for veteran hobos.</p> <button onclick="alert('Bernard nods in approval of your hustle.')">Talk to Bernard</button> </div>⁠;
-},
-wishes() {
-return ⁠ <h2>The Wishing Well</h2> <div class="box"> <p>Toss 5 Points into the well to grant a wish!</p> <button data-a="makeWish" data-v="cash">Wish for Riches (+$5,000 Cash)</button><br><br> <button data-a="makeWish" data-v="awake">Wish for Energy (Max Awake)</button><br><br> <button data-a="makeWish" data-v="stat">Wish for Might (+5 STR & POW)</button> </div>⁠;
-},
-achieve() {
-return ⁠<h2>Achievements</h2> <div class="box"> <table class="t"> <tr><th>Achievement</th><th>Status</th></tr> ${ACHIEVEMENTS.map(a =>⁠
-<tr>
-<td><b>￼{a.d} (Reward: $${a.r})</span></td>
-<td>${S.achievements[a.id] ? '<span class="g">COMPLETED</span>' : '<span class="r">LOCKED</span>'}</td>
-</tr>⁠).join('')} </table> </div>⁠;
-}
-};
 function render() {
-if (!S) {
-document.getElementById('c').innerHTML = ⁠ <div class="box" style="text-align:center"> <h2>Alley Wars RPG</h2> <p>Create your character to play:</p> <input id="cname" placeholder="Hobo Name"> <button data-a="create">Start Game</button> </div>⁠;
-return;
+  var top = document.getElementById('top');
+  var c = document.getElementById('c');
+  
+  if(!S) S = newState('Hobo');
+
+  // Top Bar Status
+  top.innerHTML = `
+    <table>
+      <tr>
+        <td><b>${S.name}</b> (Lv ${S.lv})</td>
+        <td style="text-align:right"><b>Cash:</b> $${S.cash} | <b>Bank:</b> $${S.bank}</td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div class="bar"><i style="width:${(S.hp/S.maxHp)*100}%;background:#4caf50"></i></div>
+          <div style="font-size:10px;display:flex;justify-content:space-between">
+            <span>HP: ${S.hp}/${S.maxHp}</span>
+            <span>Awake: ${S.T}/100</span>
+            <span>Turns: ${S.turns}</span>
+          </div>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  // Update Nav Bar Active Highlights
+  document.querySelectorAll('.nav-item').forEach(function(el) {
+    if(el.getAttribute('data-v') === view) el.classList.add('active');
+    else el.classList.remove('active');
+  });
+
+  // Render Views
+  var html = '';
+  if(note) html += `<div class="box" style="border-color:#64b5f6">${note}</div>`;
+
+  if(view === 'home') {
+    html += `
+      <h2>My Hobo Dashboard</h2>
+      <div class="box">
+        <p><b>Level:</b> ${S.lv} (${S.xp} XP)</p>
+        <p><b>Stats:</b> Speed: ${S.spd} | Power: ${S.pow} | Strength: ${S.str}</p>
+        <p><b>Intelligence:</b> ${S.int} | <b>Begging Multiplier:</b> x${S.beg.toFixed(2)}</p>
+      </div>
+      <button data-a="rest">Rest (+20 Awake)</button>
+    `;
+  } else if(view === 'pack') {
+    html += `
+      <h2>Backpack</h2>
+      <div class="box">
+        <p><b>Cans Collected:</b> ${S.cans}</p>
+        <p><b>Points:</b> ${S.pts} | <b>Tokens:</b> ${S.tok}</p>
+      </div>
+    `;
+  } else if(view === 'city') {
+    html += `
+      <h2>City Map</h2>
+      <div class="box">
+        <p>Current Location: (${S.pos.x}, ${S.pos.y})</p>
+        <button data-a="move" data-v="0,-1">North ↑</button><br>
+        <button data-a="move" data-v="-1,0">West ←</button>
+        <button data-a="move" data-v="1,0">East →</button><br>
+        <button data-a="move" data-v="0,1">South ↓</button>
+      </div>
+    `;
+  } else if(view === 'fight') {
+    html += `
+      <h2>Hobo Fights</h2>
+      <div class="box">
+        <p>Challenge local hobos to earn cash and experience!</p>
+        <button data-a="fight_npc">Fight Street Rival (5 Awake)</button>
+      </div>
+    `;
+  } else if(view === 'chat') {
+    html += `
+      <h2>Gang Chat</h2>
+      <div class="box log">
+        <div>[System]: Welcome to Alley Wars Gang Chat.</div>
+        <div>[Big Mike]: Anyone selling cans today?</div>
+      </div>
+      <input type="text" placeholder="Type a message..." style="width:70%">
+      <button>Send</button>
+    `;
+  }
+
+  c.innerHTML = html;
 }
-topbar();
-const viewFn = VIEWS[view] || VIEWS.home;
-document.getElementById('c').innerHTML = (note ? ⁠<div class="box g"><b>${esc(note)}</b></div>⁠ : '') + viewFn();
-// Highlight active bottom nav button
-document.querySelectorAll('#bot-nav button').forEach(btn => {
-btn.classList.toggle('active', btn.dataset.v === view);
+
+// Global Robust Event Router
+document.addEventListener('click', function(e) {
+  var target = e.target.closest('[data-a]');
+  if(!target) return;
+
+  e.preventDefault();
+  var action = target.getAttribute('data-a');
+  var val = target.getAttribute('data-v');
+
+  note = '';
+
+  if(action === 'go') {
+    view = val;
+    window.scrollTo(0, 0);
+  } else if(action === 'rest') {
+    S.T = Math.min(100, S.T + 20);
+    note = 'Rested! Awake increased.';
+  } else if(action === 'move') {
+    if(S.turns <= 0) {
+      note = 'No turns left!';
+    } else {
+      var coords = val.split(',').map(Number);
+      S.pos.x += coords[0];
+      S.pos.y += coords[1];
+      S.turns--;
+      if(Math.random() < 0.5) {
+        var found = Math.floor(Math.random() * 5) + 1;
+        S.cans += found;
+        note = 'Moved to (' + S.pos.x + ',' + S.pos.y + ') and found ' + found + ' cans!';
+      } else {
+        note = 'Moved to (' + S.pos.x + ',' + S.pos.y + ').';
+      }
+    }
+  } else if(action === 'fight_npc') {
+    if(S.T < 5) {
+      note = 'Not enough Awake!';
+    } else {
+      S.T -= 5;
+      S.xp += 10;
+      S.cash += 15;
+      note = 'Won the fight! Gained 10 XP and $15.';
+    }
+  }
+
+  save();
+  render();
 });
-}
-/* ===== GLOBAL EVENT LISTENERS ===== */
-document.addEventListener('click', e => {
-const btn = e.target.closest('[data-a]');
-if (!btn) return;
-e.preventDefault();
-const action = btn.dataset.a;
-const value = btn.dataset.v;
-if (action === 'create') {
-const input = document.getElementById('cname');
-note = A.create(input ? input.value : 'Hobo');
-} else if (A[action]) {
-const res = Aaction;
-if (res) note = res;
-}
-render();
-});
-setInterval(() => {
-if (S) { tick(); topbar(); }
-}, 1000);
+
+// Initialization
 load();
 render();
 </script>
