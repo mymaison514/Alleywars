@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Alley Wars v2 (offline)</title>
 <style>
-* { box-sizing: border-box; }
-body{margin:0;padding-bottom:65px;background:#fff;color:#111;font:15px/1.4 Verdana,sans-serif}
+body{margin:0;background:#fff;color:#111;font:15px/1.4 Verdana,sans-serif}
 a{color:#00e;cursor:pointer}a.x{color:#999;pointer-events:none}
 #top{position:sticky;top:0;background:#ddd;border-bottom:2px solid #111;padding:3px 6px;font-size:12px;z-index:5}
 #top table{width:100%;border-collapse:collapse}#top td{vertical-align:top;padding:0 4px}
@@ -19,47 +18,14 @@ button,input,select{font:inherit;padding:3px 7px}.g{color:green}.r{color:#c00}.m
 .grid i{aspect-ratio:1;background:#ddd;font-style:normal;font-size:10px;text-align:center}
 .grid i.v{background:#9c9}.grid i.p{background:#c33;color:#fff}
 .log{max-height:260px;overflow:auto;font:12px monospace}
-.t{display:block;overflow-x:auto}
-
-/* Mobile Bottom Navigation Bar */
-#bnav { position: fixed; bottom: 0; left: 0; right: 0; height: 55px; background: #eee; border-top: 2px solid #111; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #111; font-size: 11px; flex: 1; height: 100%; text-decoration: none; font-weight: bold; }
-.nav-item.active { background: #ccc; color: #00e; }
-.nav-icon { font-size: 16px; margin-bottom: 2px; }
-
-#err-log { position: fixed; top: 0; left: 0; right: 0; background: #c00; color: white; padding: 6px; font-size: 12px; z-index: 9999; display: none; }
-</style></head><body>
-<div id="err-log"></div>
-<div id="top"></div>
-<div id="c"></div>
-
-<!-- Mobile Bottom Navigation Bar -->
-<div id="bnav">
-  <a class="nav-item" data-a="go" data-v="home"><span class="nav-icon">🏠</span>Home</a>
-  <a class="nav-item" data-a="go" data-v="pack"><span class="nav-icon">🎒</span>Backpack</a>
-  <a class="nav-item" data-a="go" data-v="city"><span class="nav-icon">🏙️</span>City</a>
-  <a class="nav-item" data-a="go" data-v="fight"><span class="nav-icon">👊</span>Fight</a>
-  <a class="nav-item" data-a="go" data-v="chat"><span class="nav-icon">💬</span>Gang Chat</a>
-</div>
-
+.t{display:block;overflow-x:auto}</style></head><body><div id="top"></div><div id="c"></div>
 <script>
 'use strict';
-
-window.onerror = function(msg, url, lineNo) {
-  var err = document.getElementById('err-log');
-  if(err) {
-    err.style.display = 'block';
-    err.innerHTML = '<b>Runtime Error:</b> ' + msg + ' (Line ' + lineNo + ')';
-  }
-  return false;
-};
-
-/* ===== CONFIG ===== */
+/* ===== CONFIG (all tunables live here) ===== */
 const CONFIG={KEY:'alleywars_v2',VER:2,
  presets:{classic:{regen:900,reset:86400,turns:100},relaxed:{regen:60,reset:1800,turns:100},accelerated:{regen:10,reset:300,turns:200}},
  fightT:5,begT:10,mapCost:10,pop:300,gridN:100};
-
-/* ===== DATA ===== */
+/* ===== DATA ===== (prices/items = APPROXIMATIONS unless noted) */
 const G=(n,k,v,p,lv,d,x)=>({n,k,v,p,lv,d,x:x||''});
 const GEAR={
 stick:G('Sturdy Stick','wep',3,30,1,'+3 damage. Better than fists.'),pipe:G('Lead Pipe','wep',10,300,3,'+10 damage.'),
@@ -107,38 +73,145 @@ const SCHOOLS={ps:{n:'Primary School',lo:1,hi:10,cash:0,t:5,fee:20,g:1},hs:{n:'H
 const FN='Dex Mara Jonas Lena Otis Pearl Ruben Tilda Cal Nell Gus Vera Moe Ida Hank Rosa Abe Faye Lou Wren Ned Opal Sid Tess Bo Cora Walt Dot Finn Edie'.split(' ');
 const LN='Ravenhurst Mudge Pike Okafor Brandt Quill Sorensen Dabrowski Tamm Hollis Vance Ng Ferreira Lund Abbott Kessler Rowe Imani Castellan Boggs Yoder Marlow Pruitt Santos'.split(' ');
 const ADJ='Rusty Lucky Greasy Quiet Slick Dusty Mad Lazy Tin Old'.split(' '),NOUN='Pete Bandit Pigeon Duke Nails Sparrow Hawk Mule Biscuit Fox'.split(' ');
-
-/* ===== STATE & UTILS ===== */
+/* ===== STATE ===== */
 const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,rf=(a,b)=>a+Math.random()*(b-a);
 const need=l=>Math.round(56*Math.pow(l,1.6)),mhpOf=l=>20+(l-1)*10;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const f2=n=>(+n).toFixed(2),money=n=>'$'+Math.floor(n).toLocaleString();
 const pk=a=>a[rnd(0,a.length-1)];
 function pname(){const r=Math.random();return r<.4?pk(FN)+' '+pk(LN):r<.65?pk(ADJ)+' '+pk(NOUN):r<.85?pk(FN).toLowerCase()+pk(LN).slice(0,3)+rnd(1,99):'The '+pk(NOUN)+' '+rnd(2,9)}
-
 function newState(n){const t=Date.now(),P=CONFIG.presets.relaxed;
  const st={v:CONFIG.VER,name:n,pack:0,cages:1,rats:[],rat:0,don:0,donP:false,donOn:0,donLog:[],gang:0,gRank:'',gangs:[],chat:[],evq:[],pms:{},wardrobe:{},app:{skin:1,hair:1,hairc:1,beard:1,hat:'',top:'jacketG',pants:'jeans',acc:''},armory:{},uni:{score:0,rr:0},war:{w:0,l:0},invites:[],lastChat:0,id:rnd(1e6,9e6),lv:1,xp:0,cash:10,bank:1000,pts:0,tok:1000,hp:20,T:100,meals:5,tref:0,ptr:0,tokref:0,cans:0,int:2,beg:2.4,resp:0,
  spd:2,pow:2,str:2,eq:{wep:null,arm:null,ring:null},inv:{},food:{},map:false,trolly:false,gift:false,skip:false,quests:{},school:{},
  pos:{x:rnd(10,90),y:rnd(10,90)},turns:P.turns,visited:[],finds:[],sales:[],tx:[],bat:{w:0,l:0,lw:null,ll:null},ct:{steps:0,trains:0,begs:0,sold:0},rk:{cur:0,prev:0},
  set:{pace:'relaxed',sim:1,sandbox:false,protect:true,unl:false,chat:1,cheat:{hp:true,T:true,meals:true,free:true,reqs:true,stats:true}},rt:{rg:t,rs:t,sim:t},log:[],feed:[],mail:1,
  players:genPop()};st.gangs=genGangs(st.players);return st}
-
 let S=null,view='home',note='',memOnly=false;
-function lg(m,c){if(!S)return;S.log.unshift({t:new Date().toLocaleTimeString(),m,c:c||''});S.log.length=Math.min(S.log.length,150)}
-
+function lg(m,c){S.log.unshift({t:new Date().toLocaleTimeString(),m,c:c||''});S.log.length=Math.min(S.log.length,150)}
+/* ===== PERSISTENCE ===== */
 function save(){try{localStorage.setItem(CONFIG.KEY,JSON.stringify(S))}catch(e){memOnly=true}}
+const num=(v,d)=>Number.isFinite(+v)&&+v>=0?+v:d;
+function validate(o){
+ if(!o||typeof o!=='object'||o.v!==CONFIG.VER)return null;
+ const b=newState(String(o.name||'Hobo').slice(0,20));
+ for(const k of ['id','lv','xp','cash','bank','pts','tok','hp','T','meals','tref','ptr','tokref','cans','int','beg','resp','spd','pow','str','turns','mail']){const v=Number(o[k]);if(!Number.isFinite(v))return null;b[k]=k==='turns'?v:Math.max(0,v)}
+ if(b.lv<1)b.lv=1;b.T=Math.min(b.T,100);b.hp=Math.min(b.hp,mhpOf(b.lv));
+ for(const k of ['map','trolly','gift','skip'])b[k]=o[k]===true;
+ for(const [k,tb] of [['inv',GEAR],['food',FOOD]]){b[k]={};if(o[k]&&typeof o[k]==='object')for(const id in o[k]){const n=Math.floor(Number(o[k][id]));if(tb[id]&&n>0)b[k][id]=Math.min(n,9999)}}
+ for(const s of ['wep','arm','ring']){const id=o.eq&&o.eq[s];if(id&&GEAR[id]&&GEAR[id].k===s&&b.inv[id])b.eq[s]=id}
+ for(const q of QUESTS)if(o.quests&&o.quests[q.id]===true)b.quests[q.id]=true;
+ for(const k of ['ps','hs'])if(o.school&&o.school[k]===true)b.school[k]=true;
+ if(o.pos){b.pos.x=Math.min(99,num(o.pos.x,50));b.pos.y=Math.min(99,num(o.pos.y,50))}
+ if(Array.isArray(o.visited))b.visited=o.visited.filter(Number.isInteger).slice(-3000);
+ for(const k of ['finds','sales','tx','log','feed'])if(Array.isArray(o[k]))b[k]=o[k].slice(0,150).map(x=>(x&&typeof x==='object')?Object.fromEntries(Object.entries(x).filter(([,v])=>typeof v!=='object')):{});
+ if(o.bat)for(const k of ['w','l'])b.bat[k]=num(o.bat[k],0);
+ if(o.bat){b.bat.lw=o.bat.lw?String(o.bat.lw):null;b.bat.ll=o.bat.ll?String(o.bat.ll):null}
+ if(o.ct)for(const k in b.ct)b.ct[k]=num(o.ct[k],0);
+ if(o.set){if(CONFIG.presets[o.set.pace])b.set.pace=o.set.pace;if([0,1,3].includes(o.set.sim))b.set.sim=o.set.sim;for(const k of ['sandbox','protect','unl'])b.set[k]=o.set[k]===true}
+ if(o.rt)for(const k of ['rg','rs','sim'])b.rt[k]=num(o.rt[k],Date.now());
+ if(Array.isArray(o.players)&&o.players.length){const ok=o.players.filter(p=>p&&['id','lv','xp','spd','pow','str','wp','ar','cash','w','l','act'].every(k=>Number.isFinite(+p[k]))&&p.lv>=1).map(p=>({...p,n:String(p.n).slice(0,30)}));if(ok.length>=10)b.players=ok}
+ return fin(b,o)}
 function load(){let raw=null;try{raw=localStorage.getItem(CONFIG.KEY)}catch(e){memOnly=true}
- if(raw){try{S=JSON.parse(raw);}catch(e){}}
- if(!S)S=newState('Hobo');}
-
+ if(!raw)return;try{const s=validate(JSON.parse(raw));if(!s)throw 0;S=s;tick()}catch(e){try{localStorage.setItem(CONFIG.KEY+'_bad',raw)}catch(_){}note='Saved game unreadable; a backup copy was kept. Start new or import a save.'}}
+/* ===== ENGINE ===== */
+const PR=()=>CONFIG.presets[S.set.pace];
+function lvlUp(o){while(o.xp>=need(o.lv)){o.xp-=need(o.lv);o.lv++}}
+function gainXp(n){const m=1+(S.eq.ring&&GEAR[S.eq.ring].x==='exp'?GEAR[S.eq.ring].v*.05:0);S.xp+=Math.round(n*m);const l=S.lv;lvlUp(S);if(S.lv>l){S.hp=mhpOf(S.lv);lg('LEVEL UP! Level '+S.lv+'. Life restored.','g');S.evq.push({t:'lvl'})}}
+function spendT(a){if(cz('T'))return;if(S.T>=100)S.rt.rg=Date.now();S.T-=a}
+function tick(){const n=Date.now(),p=PR(),rg=p.regen*1000*(don()?2/3:1);
+ if(cz('T')){S.T=100;S.rt.rg=n}else if(S.T>=100||S.rt.rg>n)S.rt.rg=n;else{const c=Math.floor((n-S.rt.rg)/rg);if(c>0){S.T=Math.min(100,S.T+5*c);S.rt.rg+=c*rg;if(S.T>=100)S.rt.rg=n}}
+ if(cz('hp'))S.hp=mhpOf(S.lv);if(cz('meals'))S.meals=5;
+ if(S.rt.rs>n)S.rt.rs=n;if(n-S.rt.rs>=p.reset*1000){newDay();S.rt.rs=n}
+ if(S.donOn&&!S.donP&&S.don<=n){S.donOn=0;S.donLog.unshift(new Date().toLocaleString()+': Donator status expired')}
+ simRun(n)}
+function newDay(){S.turns=Math.max(S.turns,0)<CONFIG.presets[S.set.pace].turns?CONFIG.presets[S.set.pace].turns:S.turns;S.meals=5;S.tref=0;S.ptr=0;S.tokref=0;S.uni={score:0,rr:0};if(don())S.turns=Math.round(S.turns*1.25);lg('A new day begins: turns, meals and refills reset.')}
+const ev=s=>s<=500?s:500+(s-500)*.8;
+function oppCombat(p){const s=ev(p.str),pw=ev(p.pow),sp=ev(p.spd);return{dmg:[s/6+pw/2+p.wp,s/4+.75*pw+p.wp],def:[s/3+p.ar,s/2+p.ar],spd:[sp/4,sp],hp:mhpOf(p.lv)}}
+const R=a=>rf(a[0],a[1]);
+function duel(a,b,out){let r=0;
+ while(a.hp>0&&b.hp>0&&r<200){r++;const sa=R(a.spd),sb=R(b.spd),na=sa>=sb?Math.min(10,Math.max(1,Math.round(sa/Math.max(sb,.5)))):1,nb=sb>sa?Math.min(10,Math.max(1,Math.round(sb/Math.max(sa,.5)))):1;
+  let da=0,db=0;for(let i=0;i<na&&b.hp>0;i++){const d=Math.max(0,R(a.dmg)-R(b.def));b.hp-=d;da+=d}
+  for(let i=0;i<nb&&b.hp>0&&a.hp>0;i++){const d=Math.max(0,R(b.dmg)-R(a.def));a.hp-=d;db+=d}
+  if(r<=6)out.push('Round '+r+': you hit '+na+'x for '+f2(da)+' | foe hit '+nb+'x for '+f2(db)+' (you '+f2(Math.max(0,a.hp))+', foe '+f2(Math.max(0,b.hp))+')')}
+ out.push(r>=200?'200 rounds reached: DRAW.':'Fight ended after '+r+' rounds.');return r>=200?0:a.hp>0?1:-1}
+function rankList(){return S.players.concat([{id:S.id,n:S.name,lv:S.lv,xp:S.xp,spd:S.spd,pow:S.pow,str:S.str,w:S.bat.w,l:S.bat.l,me:1,wp:0,ar:0,cash:S.cash}]).sort((a,b)=>b.lv-a.lv||b.xp-a.xp)}
+const myRank=()=>rankList().findIndex(p=>p.me)+1;
+function canPrice(L,i){const base=Math.floor(8+.8*Math.min(L,200)+(L>200?(L-200)*.4:0));
+ const f=1+Math.min(i,1500)/500+(i>1500?(Math.min(i,3000)-1500)/1000:0)+(i>3000?(i-3000)/2000:0);return Math.max(1,Math.floor(base*f))}
+const dead=()=>S.hp<=0,tx=m=>{S.tx.unshift({t:new Date().toLocaleTimeString(),m});S.tx.length=Math.min(S.tx.length,100)};
+const gearTot=k=>S.eq[k]?GEAR[S.eq[k]].v:0;
+const A={
+ create(n){n=String(n).trim().slice(0,20);if(!n)return'Enter a name.';S=newState(n);lg('Welcome, '+n+'.');return'Character created.'},
+ bank(d){const a=Math.floor(Number(document.getElementById('amt').value));if(!(a>0))return'Enter an amount.';
+  if(d==='dep'){if(a>S.cash)return'Not enough cash.';S.cash-=a;S.bank+=a}else{if(a>S.bank)return'Not enough in bank.';S.bank-=a;S.cash+=a}return'Done.'},
+ buyMap(){if(S.map)return'You already have a map.';if(S.cash<CONFIG.mapCost)return'Need $'+CONFIG.mapCost+'.';S.cash-=CONFIG.mapCost;S.map=true;return'City map bought. You can explore.'},
+ move(d){if(!S.map)return'Buy a city map first.';const[dx,dy]=d.split(',').map(Number);if(![-1,0,1].includes(dx)||![-1,0,1].includes(dy)||(!dx&&!dy))return'Invalid move.';
+  if(!S.set.unl&&S.turns<1)return'No explore turns left. Wait for the new day or trade points.';
+  const x=S.pos.x+dx,y=S.pos.y+dy,N=CONFIG.gridN;if(x<0||y<0||x>=N||y>=N)return'The city ends here.';
+  S.pos={x,y};if(!S.set.unl)S.turns--;S.ct.steps++;const k=x*N+y;if(!S.visited.includes(k)){S.visited.push(k);if(S.visited.length>3000)S.visited.shift()}
+  const r=Math.random();let m='Nothing here.';
+  if(r<.25){const c=rnd(3,15)+S.lv*rnd(1,3);S.cash+=c;m='Found $'+c+'!'}
+  else if(r<.55){if(S.trolly){const c=rnd(1,7);S.cans+=c;m='Found '+c+' cans.'}else m='You see cans, but have no trolly to carry them.'}
+  else if(r<.70){if(!S.trolly)m='You see food, but have no trolly.';else if(Object.values(S.food).reduce((a,b)=>a+b,0)>=20)m='Food found, but your trolly is full.';else{const id=pk(FIND_FOOD);S.food[id]=(S.food[id]||0)+1;m='Found '+FOOD[id].n+'.'}}
+  else if(r<.72){S.pts+=1;m='Found a lucky 1 point!'}
+  else if(r<.735&&S.rats.length<ratCap()){addRat('sewer');m='A stray rat follows you home!'}
+  S.finds.unshift({t:new Date().toLocaleTimeString(),m:'('+x+','+y+') '+m});S.finds.length=Math.min(S.finds.length,60);return m},
+ sell(){const q=Math.floor(Number(document.getElementById('qty').value));if(!(q>0))return'Enter a quantity.';if(q>S.cans)return'You only have '+S.cans+' cans.';
+  const pr=canPrice(S.lv,S.int),t=pr*q;S.cans-=q;S.cash+=t;S.ct.sold++;S.sales.unshift({t:new Date().toLocaleTimeString(),m:q+' cans @ $'+pr+' = $'+t});S.sales.length=Math.min(S.sales.length,60);lg('Sold '+q+' cans for $'+t+'.','g');return'Sold '+q+' cans for $'+t},
+ buy(id){const g=GEAR[id],f=FOOD[id],it=g||f;if(!it)return'Unknown item.';if(g&&S.lv<g.lv&&!cz('reqs'))return'Requires level '+g.lv+'.';
+  if(g&&invN()>=cap()&&!cz('reqs'))return'Backpack full ('+cap()+' slots). Upgrade it at the Toy Store.';
+  if(S.cash<it.p)return'Not enough cash.';
+  if(f){if(!S.trolly)return'You need a trolly to carry food.';if(Object.values(S.food).reduce((a,b)=>a+b,0)>=20&&!cz('reqs'))return'Trolly full.'}
+  S.cash-=it.p;if(g)S.inv[id]=(S.inv[id]||0)+1;else S.food[id]=(S.food[id]||0)+1;return'Bought '+it.n},
+ equip(id){const g=GEAR[id];if(!g||!S.inv[id])return'You do not own that.';S.eq[g.k]=id;return'Equipped '+g.n},
+ unequip(k){if(!S.eq[k])return'Nothing equipped.';S.eq[k]=null;return'Unequipped.'},
+ sellgear(id){if(!S.inv[id])return'You do not own that.';const p=Math.floor(GEAR[id].p*.4);if(--S.inv[id]<=0){delete S.inv[id];for(const k in S.eq)if(S.eq[k]===id)S.eq[k]=null}S.cash+=p;return'Sold for $'+p},
+ eat(id){const f=FOOD[id];if(!f||(!S.food[id]&&!cz('meals')))return'You do not have that.';
+  if(!cz('meals')){if(S.meals<1)return'No meals left this day.';if(S.T>=100)return'You cannot eat at 100T.';S.meals--}
+  S.T=Math.min(100,S.T+f.t);if(!cz('meals')&&--S.food[id]<=0)delete S.food[id];return'Ate '+f.n+': +'+f.t+'T'},
+ train(a){const[sc,st]=a.split('|'),S0=SCHOOLS[sc];if(!S0||!['int','str','pow','spd'].includes(st))return'Invalid.';
+  if(!cz('reqs')&&(S.lv<S0.lo||S.lv>S0.hi))return'Level '+S0.lo+'-'+S0.hi+' only.';
+  if(!S.school[sc]){if(S.cash<S0.fee)return'Entry fee is $'+S0.fee+'.';S.cash-=S0.fee;S.school[sc]=true;lg('Paid '+money(S0.fee)+' entry fee.')}
+  if(dead())return'You are dead. Visit the hospital.';if(S.T<S0.t)return'Need '+S0.t+'T.';if(S.cash<S0.cash)return'Need '+money(S0.cash)+'.';
+  S.cash-=S0.cash;spendT(S0.t);S.ct.trains++;const g=+(rf(.4,.7)*(1+S.int/100)*S0.g*(st==='int'?.25:1)).toFixed(3);S[st]+=g;lg('Trained '+st+' +'+g,'g');return'Trained '+st.toUpperCase()+' +'+g},
+ beg(){if(S.T<CONFIG.begT)return'Need '+CONFIG.begT+'T.';spendT(CONFIG.begT);S.ct.begs++;
+  const gg=gangOf(),c=Math.round((3+S.lv*1.5)*S.beg*(1+Math.floor(S.int/50)*.1)*(dead()?.8:1)*(1+(gg?gg.lv*.004:0))*(S.eq.ring&&GEAR[S.eq.ring].x==='beg'?1.1:1));S.cash+=c;S.beg+=S.beg<50?.02:.024;
+  let x='';if(Math.random()<.03){S.pts+=2;x=' +2 points!'}lg('Begged: +$'+c+x,'g');return'Begged $'+c+x},
+ fight(id){const o=S.players.find(p=>p.id===+id);if(!o)return'Opponent not found.';const god=cz('hp');if(dead()&&!god)return'You are dead. Visit the hospital.';
+  if(S.T<CONFIG.fightT&&!cz('T'))return'Need '+CONFIG.fightT+'T.';const lo=S.lv<=15?1:S.lv<=40?10:25;if(!cz('reqs')&&(o.lv<lo||Math.abs(o.lv-S.lv)>200))return'Out of attack range.';
+  spendT(CONFIG.fightT);const out=[],me=myCombat(),op=oppCombat(o);if(god)me.hp=1e9;const res=duel(me,op,out);S.hp=god?mhpOf(S.lv):Math.max(0,Math.ceil(me.hp));
+  const wp=o.w/Math.max(1,o.w+o.l),d=o.lv-S.lv;let m;
+  if(res>0){let xp=(10+o.lv*2)*Math.min(3,Math.max(.5,1+d*.04));xp*=wp<.35?.5:wp>.7?1.2:1;xp*=1+S.int/1000;const c=Math.floor(o.cash/2);o.cash-=c;S.cash+=c;S.bat.w++;o.l++;o.mem.loss++;S.bat.lw=o.n;gainXp(xp);
+   const rs=Math.max(1,Math.round(d/2)+1);S.resp+=rs;const rt=S.rats.find(x=>x.id===S.rat);if(rt&&++rt.xp>=rt.lv*5){rt.xp=0;rt.lv++;rt.spd++;rt.pow++;rt.str++}
+   const g=gangOf();if(g){g.xp+=3;if(g.xp>=1000*g.lv){g.xp-=1000*g.lv;g.lv++}}o.hist.unshift('Lost to '+S.name);if(o.hist.length>8)o.hist.length=8;S.evq.push({t:'win',o:o.n});
+   out.push('VICTORY vs '+o.n+': +'+Math.round(xp)+' XP, +$'+c+', +'+rs+' respect');m='Victory! +$'+c}
+  else if(res<0){const l=S.set.protect?0:Math.floor(S.cash/2);S.cash-=l;o.cash+=l;S.bat.l++;o.w++;o.mem.win++;S.bat.ll=o.n;S.evq.push({t:'loss',o:o.n});out.push('DEFEAT vs '+o.n+(l?': lost $'+l:' (protection on: no cash lost)')+'. You are dead.');S.hp=0;m='Defeat. Visit the hospital.'}
+  else{out.push('Draw: nobody gains or loses anything.');m='Draw.'}
+  out.forEach(x=>lg(x,res>0?'g':res<0?'r':''));S.lastFight=out;return m},
+ heal(){const mx=mhpOf(S.lv),miss=mx-S.hp;if(miss<=0)return'You are fine.';const c=dead()?0:Math.ceil(miss);if(S.cash<c)return'Costs '+money(c)+'.';S.cash-=c;S.hp=mx;return'Healed'+(c?' for '+money(c):' (revival is free)')+'.'},
+ gift(){if(S.gift)return'Already received.';S.gift=true;S.trolly=true;S.cash+=20;lg("Duncan gave you a trolly and $20.");return'Duncan hands you a trolly and $20.'},
+ skipIntro(){if(!confirm('Skip? You forfeit the quest rewards forever.'))return'';S.skip=true;S.trolly=true;S.gift=true;return'Skipped.'},
+ quest(id){const q=QUESTS.find(x=>x.id===id);if(!q)return'Unknown.';if(S.skip)return'You skipped these.';if(S.quests[id])return'Already claimed.';if(!q.ok(S))return'Not done yet.';S.quests[id]=true;S.cash+=q.c;return'Quest reward: '+money(q.c)},
+ pace(p){if(!CONFIG.presets[p])return'';tick();S.set.pace=p;S.rt.rg=Date.now();return'Pacing: '+p},
+ sim(v){S.set.sim=+v;return'Simulation '+(+v?'x'+v:'paused')},
+ toggle(k){S.set[k]=!S.set[k];return k+': '+(S.set[k]?'on':'off')},
+ newday(){newDay();S.turns=PR().turns;S.rt.rs=Date.now();return'New day started.'},
+ gr(k){if(!S.set.sandbox)return'Enable sandbox mode first.';const G={pts:['pts',10],tok:['tok',100000],cash:['cash',100000],turns:['turns',100],T:['T',0]};
+  if(k==='T'){S.T=100;tx('SANDBOX: refilled awake')}else{S[G[k][0]]+=G[k][1];tx('SANDBOX: +'+G[k][1]+' '+k)}return'Sandbox grant applied.'},
+ tTurns(){if(S.ptr>=10)return'Limit 10 per day.';if(S.pts<1)return'Need 1 point.';S.pts--;S.ptr++;S.turns+=25;tx('1 point -> 25 turns');return'+25 explore turns'},
+ tRef(){if(S.tref>=2)return'Limit 2 per day.';if(S.pts<5)return'Need 5 points.';S.pts-=5;S.tref++;S.T=100;tx('5 points -> 100T');return'Awake refilled'},
+ tTok(){if(S.tokref)return'Once per day.';if(S.tok<50000)return'Need 50,000 tokens.';S.tok-=50000;S.tokref=1;S.T=Math.min(100,S.T+50);tx('50k tokens -> 50T');return'+50T'},
+ resetAll(){if(!confirm('Delete this character? Export first for a backup.'))return'';try{localStorage.removeItem(CONFIG.KEY)}catch(_){}S=null;view='home';return''}};
+/* ===== v2.1 systems ===== */
 const cz=k=>!!(S&&S.set.sandbox&&S.set.cheat&&S.set.cheat[k]);
-const don=()=>S&&(S.donP||S.don>Date.now());
-const invN=()=>S?Object.values(S.inv).reduce((a,b)=>a+b,0):0,cap=()=>10+10*S.pack+(don()?10:0),ratCap=()=>S.cages+(don()?2:0);
-const gangOf=()=>S?S.gangs.find(g=>g.id===S.gang):null,members=g=>S?S.players.filter(p=>p.gang===g.id):[];
+const don=()=>S.donP||S.don>Date.now();
+const invN=()=>Object.values(S.inv).reduce((a,b)=>a+b,0),cap=()=>10+10*S.pack+(don()?10:0),ratCap=()=>S.cages+(don()?2:0);
+const gangOf=()=>S.gangs.find(g=>g.id===S.gang),members=g=>S.players.filter(p=>p.gang===g.id);
 const gPower=g=>members(g).reduce((a,p)=>a+p.lv,0)+g.lv*10+(g.me&&S.gang===g.id?S.lv:0);
-const owned=id=>CLOTH[id].p===0||!!(S&&S.wardrobe[id]);
-
+const owned=id=>CLOTH[id].p===0||!!S.wardrobe[id];
 function mkApp(){return{skin:rnd(0,4),hair:rnd(0,3),hairc:rnd(0,4),beard:rnd(0,2),hat:pk(['','','beanie','cap','tophat']),top:pk(['jacketG','hoodie','suit']),pants:pk(['jeans','cargo','gold']),acc:pk(['','','','glasses','scarf','chain','shades'])}}
+function cleanApp(a,d){a=a||{};const r={};for(const k of ['skin','hair','hairc','beard']){const v=Math.floor(+a[k]);r[k]=Number.isFinite(v)&&v>=0&&v<=4?v:d[k]}
+ for(const k of ['hat','top','pants','acc']){const v=a[k];r[k]=v===''||(CLOTH[v]&&CLOTH[v].k===k)?v:d[k]}return r}
 function genGangs(P){const G2=GN.map((g,i)=>({id:i+1,n:g[0],c:GCOL[i],th:g[1],lv:rnd(2,14),xp:rnd(0,500),tr:rnd(5e3,5e5),min:GMIN[i],rv:0,wins:rnd(0,30),loss:rnd(0,30),lead:0,me:false,feed:[],hist:'Founded '+rnd(2,12)+' years ago around the old '+pk(['rail yard','docks','bus depot','soup line','parking garage'])+'.'}));
  G2.forEach((g,i)=>g.rv=G2[(i+rnd(1,G2.length-1))%G2.length].id);P.forEach(p=>{p.gang=0;p.gr=''});
  const by=P.slice().sort((a,b)=>b.lv-a.lv);G2.forEach(g=>{const l=by.find(p=>!p.gang&&p.lv>=g.min);if(l){l.gang=g.id;if(l.pers==='quiet')l.pers='leader';g.lead=l.id}});
@@ -146,111 +219,279 @@ function genGangs(P){const G2=GN.map((g,i)=>({id:i+1,n:g[0],c:GCOL[i],th:g[1],lv
 function mkPlayer(i){const L2=1+Math.floor(Math.pow(Math.random(),2.2)*45),sp=[rf(.5,1.4),rf(.5,1.4),rf(.5,1.4)],b=g=>+(2+(L2-1)*rf(.8,2.2)*g).toFixed(2),t=Date.now();
  return{id:100000+i*13+rnd(0,12),n:pname(),age:rnd(18,45),sx:pk(['M','M','F','F','N']),pers:pk(PERS),style:pk(STYLES),app:mkApp(),gang:0,gr:'',lv:L2,xp:rnd(0,need(L2)-1),spd:b(sp[0]),pow:b(sp[1]),str:b(sp[2]),wp:rnd(0,L2*3),ar:rnd(0,L2*2),cash:rnd(0,L2*150),w:rnd(0,L2*4),l:rnd(0,L2*4),act:t-rnd(0,36e5),mem:{win:0,loss:0,fav:0,chats:0},hist:[]}}
 function genPop(){const used=new Set(),P=[];for(let i=0;i<CONFIG.pop;i++){const p=mkPlayer(i);let t=0;while(used.has(p.n)&&t++<20)p.n=pname();if(used.has(p.n))p.n+=' '+i;used.add(p.n);P.push(p)}return P}
-
-const PR=()=>CONFIG.presets[S.set.pace];
-function dead(){return S.hp<=0;}
-function rankList(){return S.players.concat([{id:S.id,n:S.name,lv:S.lv,xp:S.xp,spd:S.spd,pow:S.pow,str:S.str,w:S.bat.w,l:S.bat.l,me:1,wp:0,ar:0,cash:S.cash}]).sort((a,b)=>b.lv-a.lv||b.xp-a.xp)}
-const myRank=()=>rankList().findIndex(p=>p.me)+1;
-const canPrice=(L,i)=>Math.max(1,Math.floor((8+.8*Math.min(L,200)+(L>200?(L-200)*.4:0))*(1+Math.min(i,1500)/500)));
-
+function fin(b,o){const nn=(v,d)=>Number.isFinite(+v)&&+v>=0?+v:d,str=(v,l)=>String(v==null?'':v).slice(0,l);
+ b.pack=Math.min(PACK.length,nn(o.pack,0));b.cages=Math.min(7,Math.max(1,nn(o.cages,1)));b.don=nn(o.don,0);b.donP=o.donP===true;b.donOn=o.donOn?1:0;b.rat=nn(o.rat,0);
+ b.rats=(Array.isArray(o.rats)?o.rats:[]).filter(r=>r&&RATS[r.t]).slice(0,12).map(r=>({id:nn(r.id,0),t:r.t,nm:str(r.nm,16),lv:Math.max(1,nn(r.lv,1)),xp:nn(r.xp,0),spd:nn(r.spd,1),pow:nn(r.pow,1),str:nn(r.str,1)}));
+ if(!b.rats.some(r=>r.id===b.rat))b.rat=0;
+ b.donLog=(Array.isArray(o.donLog)?o.donLog:[]).slice(0,30).map(x=>str(x,80));
+ b.wardrobe={};if(o.wardrobe)for(const k in CLOTH)if(o.wardrobe[k]===true)b.wardrobe[k]=true;
+ b.app=cleanApp(o.app,b.app);b.armory={};if(o.armory)for(const k in GEAR)if(o.armory[k]===true)b.armory[k]=true;
+ if(o.school&&o.school.uni===true)b.school.uni=true;
+ b.uni={score:nn(o.uni&&o.uni.score,0),rr:nn(o.uni&&o.uni.rr,0)};b.war={w:nn(o.war&&o.war.w,0),l:nn(o.war&&o.war.l,0)};
+ b.invites=(Array.isArray(o.invites)?o.invites:[]).map(Number).filter(Number.isInteger).slice(0,10);b.lastChat=nn(o.lastChat,0);
+ b.players=b.players.map(p=>({id:p.id,n:str(p.n,30),age:Math.min(45,Math.max(18,nn(p.age,rnd(18,45)))),sx:['M','F','N'].includes(p.sx)?p.sx:pk(['M','F']),pers:PERS.includes(p.pers)?p.pers:pk(PERS),style:STYLES.includes(p.style)?p.style:pk(STYLES),app:cleanApp(p.app,mkApp()),gang:nn(p.gang,0),gr:p.gr==='officer'?'officer':'',lv:p.lv,xp:p.xp,spd:p.spd,pow:p.pow,str:p.str,wp:p.wp,ar:p.ar,cash:p.cash,w:p.w,l:p.l,act:p.act,mem:{win:nn(p.mem&&p.mem.win,0),loss:nn(p.mem&&p.mem.loss,0),fav:nn(p.mem&&p.mem.fav,0),chats:nn(p.mem&&p.mem.chats,0)},hist:(Array.isArray(p.hist)?p.hist:[]).slice(0,8).map(x=>str(x,70))}));
+ const ids=new Set();b.players=b.players.filter(p=>!ids.has(p.id)&&ids.add(p.id));
+ while(b.players.length<CONFIG.pop){const p=mkPlayer(b.players.length+1000);p.id+=rnd(0,5);if(!ids.has(p.id)){ids.add(p.id);b.players.push(p)}}
+ const GS=Array.isArray(o.gangs)?o.gangs.filter(g=>g&&Number.isFinite(+g.id)&&g.n):[];
+ if(GS.length>=10)b.gangs=GS.slice(0,40).map(g=>({id:+g.id,n:str(g.n,24),c:/^#[0-9a-f]{3,6}$/i.test(g.c)?g.c:'#777',th:str(g.th,60),lv:Math.max(1,nn(g.lv,1)),xp:nn(g.xp,0),tr:nn(g.tr,0),min:nn(g.min,1),rv:nn(g.rv,0),wins:nn(g.wins,0),loss:nn(g.loss,0),lead:nn(g.lead,0),me:g.me===true,hist:str(g.hist,120),feed:(Array.isArray(g.feed)?g.feed:[]).slice(0,15).map(x=>str(x,90))}));
+ else{b.gangs=genGangs(b.players);b.gang=0}
+ b.gang=GS.length>=10?nn(o.gang,0):0;if(!b.gangs.some(g=>g.id===b.gang))b.gang=0;b.gRank=str(o.gRank,12);
+ b.chat=(Array.isArray(o.chat)?o.chat:[]).slice(0,80).map(c=>({t:str(c&&c.t,12),w:str(c&&c.w,30),m:str(c&&c.m,220),me:!!(c&&c.me)}));
+ b.pms={};if(o.pms&&typeof o.pms==='object')Object.keys(o.pms).slice(0,40).forEach(k=>{if(Array.isArray(o.pms[k]))b.pms[k]=o.pms[k].slice(0,20).map(c=>({w:str(c&&c.w,30),m:str(c&&c.m,220),me:!!(c&&c.me)}))});
+ b.evq=[];const ch=(o.set&&o.set.cheat)||{};b.set.cheat={};['hp','T','meals','free','reqs','stats'].forEach(k=>b.set.cheat[k]=ch[k]!==false);b.set.chat=[0,1,2].includes(o.set&&o.set.chat)?o.set.chat:1;return b}
+function simRun(n){const el=(n-S.rt.sim)/36e5;S.rt.sim=n;if(!S.set.sim||el<=0)return;
+ const P=S.players,E=Math.min(600,Math.floor(el*P.length*2*S.set.sim)),pw=p=>p.spd+p.pow+p.str+p.wp*.8+p.ar*.8,hist=(p,m)=>{p.hist.unshift(m);if(p.hist.length>8)p.hist.length=8},gf=(g,m)=>{g.feed.unshift(m);if(g.feed.length>15)g.feed.length=15};
+ for(let k=0;k<E;k++){const p=P[rnd(0,P.length-1)],r=Math.random(),W={fighter:[.2,.85],trainer:[.65,.85],beggar:[.3,.5],explorer:[.35,.5]}[p.style];p.act=n;
+  if(r<W[0]){const s=['spd','pow','str'][rnd(0,2)];p[s]=+(p[s]+rf(.3,.9)).toFixed(2);p.xp+=rnd(1,4);lvlUp(p);if(Math.random()<.1)hist(p,'Trained '+s)}
+  else if(r<W[1]){let q=null;for(let t=0;t<5&&!q;t++){const c=P[rnd(0,P.length-1)];if(c!==p&&Math.abs(c.lv-p.lv)<=3)q=c}if(!q)continue;
+   const a=pw(p),b=pw(q),w=Math.random()<a/(a+b)?p:q,l=w===p?q:p,c=Math.floor(l.cash/2);w.w++;l.l++;w.xp+=3+l.lv;w.cash+=c;l.cash-=c;lvlUp(w);hist(w,'Beat '+l.n);hist(l,'Lost to '+w.n);
+   if(w.gang){const g=S.gangs.find(x=>x.id===w.gang);if(g){g.xp+=2;if(g.xp>=1000*g.lv){g.xp=0;g.lv++}}}
+   S.feed.unshift({t:new Date(n).toLocaleTimeString(),m:w.n+' beat '+l.n});S.feed.length=Math.min(S.feed.length,40)}
+  else{p.cash+=rnd(5,40+p.lv*10)*(p.style==='beggar'?2:1);
+   if(p.wp<p.lv*3&&p.cash>p.wp*30+80){p.cash-=p.wp*30+60;p.wp+=rnd(1,3);hist(p,'Bought a weapon')}else if(p.ar<p.lv*2&&p.cash>p.ar*30+80){p.cash-=p.ar*30+60;p.ar+=rnd(1,2);hist(p,'Bought armor')}}
+  if(!p.gang&&Math.random()<.15){const e2=S.gangs.filter(g=>g.min<=p.lv);if(e2.length){const g=pk(e2);p.gang=g.id;hist(p,'Joined '+g.n);gf(g,p.n+' joined');if(g.id===S.gang)S.evq.push({t:'join2',o:p.n})}}}
+ const wars=Math.min(5,Math.floor(el*6*S.set.sim));
+ for(let i=0;i<wars;i++){const a=pk(S.gangs),b=S.gangs.find(x=>x.id===a.rv)||pk(S.gangs);if(a===b)continue;const w=gPower(a)*rf(.8,1.2)>gPower(b)*rf(.8,1.2)?a:b,l=w===a?b:a,m=w.n+' beat '+l.n+' in a gang war';w.wins++;l.loss++;w.xp+=50;gf(w,m);gf(l,m);
+  if(S.gang===w.id){S.war.w++;S.evq.push({t:'war'})}else if(S.gang===l.id){S.war.l++;S.evq.push({t:'war'})}}
+ if(!S.gang&&S.lv>=3&&S.invites.length<3&&Math.random()<Math.min(1,el*2)){const e=S.gangs.filter(x=>x.min<=S.lv&&!x.me&&!S.invites.includes(x.id));if(e.length)S.invites.push(pk(e).id)}
+ if(S.evq.length>10)S.evq.length=10}
+function myCombat(){const s=ev(S.str),p=ev(S.pow),sp=ev(S.spd),w=S.eq.wep?GEAR[S.eq.wep].v:0,a=S.eq.arm?GEAR[S.eq.arm].v:0,r=S.rats.find(x=>x.id===S.rat),rp=r?r.pow/2:0,rs=r?r.spd/2:0,rd=r?r.str/4:0;
+ return{dmg:[s/6+p/2+w+rp,s/4+.75*p+w+rp],def:[s/3+a+rd,s/2+a+rd],spd:[sp/4,sp+rs],hp:S.hp}}
+function est(p){const me=myCombat(),op=oppCombat(p),av=a=>(a[0]+a[1])/2;if(cz('hp'))return['Easy',3];const md=Math.max(0,av(me.dmg)-av(op.def)),od=Math.max(0,av(op.dmg)-av(me.def)),ms=av(me.spd),os=av(op.spd),mk=md*(ms>=os?Math.max(1,ms/os):1),ok=od*(os>ms?Math.max(1,os/ms):1);
+ if(mk<=0&&ok<=0)return['Draw',1];if(mk<=0)return['Deadly',0];const r=(ok>0?Math.max(1,me.hp)/ok:1e9)/(op.hp/mk);return r>2.5?['Easy',3]:r>1.2?['Fair',2]:r>.7?['Risky',1]:['Deadly',0]}
+const addRat=t=>{S.rats.push({id:S.rats.reduce((a,r)=>Math.max(a,r.id),0)+1,t,nm:pk(RN),lv:1,xp:0,spd:RATS[t].st[0],pow:RATS[t].st[1],str:RATS[t].st[2]})};
+function push(w,m,me){S.chat.unshift({t:new Date().toLocaleTimeString().slice(0,5),w,m,me:!!me});S.chat.length=Math.min(S.chat.length,80)}
+function fill(t,p){const g=gangOf(),r=g&&S.gangs.find(x=>x.id===g.rv);return t.replace(/\{me\}/g,S.name).replace(/\{rk\}/g,myRank()).replace(/\{rv\}/g,r?r.n:'those guys').replace(/\{w\}/g,p.w).replace(/\{lv\}/g,S.lv).replace(/\{gang\}/g,g?g.n:'the gang')}
+function styl(p,t){const r=Math.random();switch(p.pers){
+ case'casual':t=t.toLowerCase().replace(/[.!?,']/g,'');if(r<.15)t+=' '+pk(['damn','honestly','tbh']);break;
+ case'joker':if(r<.5)t+=pk([' lol',' jk',' (im kidding... maybe)',' haha']);break;
+ case'veteran':if(r<.4)t='back in my day '+t.toLowerCase();break;
+ case'beginner':if(r<.5)t+=pk(['?',' (still learning)',' idk']);break;
+ case'collector':if(r<.4)t+=' (adding it to the collection)';break;
+ case'leader':if(r<.4)t='listen up: '+t;break;
+ case'trash-talker':if(r<.5)t=t.toUpperCase()+pk([' lol ez','',' get good']);else if(r<.65)t+=' damn';break;
+ case'helpful':if(r<.4)t+=' hope that helps';break;
+ case'quiet':t=t.split(' ').slice(0,4).join(' ')+'...';break;
+ case'social':if(r<.5)t='omg '+t.toLowerCase();t+=pk(['!!','!','!!!']);break;
+ case'competitive':if(r<.4)t=pk(['real talk: ','not gonna lie, '])+t.toLowerCase();if(r>.9)t+=' hell yeah';break}return t}
+function memLine(p,tp){const m=p.mem||{};if(tp==='fight'){if(m.loss>0&&Math.random()<.6)return'still mad you beat me, '+S.name;if(m.win>0&&Math.random()<.6)return'i beat you earlier remember? rematch whenever'}if(tp==='thanks'&&m.fav>0)return'we good, you helped the gang out before';if(tp==='greet'&&m.chats>3&&Math.random()<.5)return'{me}! back again, we should stop meeting like this';return''}
+function reply(p,text){const tp=(TOP.find(([k,re])=>re.test(text))||['any'])[0],t=memLine(p,tp)||pk(BASE[tp]||BASE.any);return styl(p,fill(t,p))}
+function chatTick(n){if(!S||!S.gang||!S.set.chat)return;const g=gangOf();if(!g)return;const gap=S.set.chat===2?12e3:40e3;if(n-S.lastChat<gap)return;const M=members(g);if(!M.length)return;
+ let e=S.evq.shift();if(!e){if(Math.random()>(S.set.chat===2?.25:.08))return;e={t:'idle'}}S.lastChat=n;const p=pk(M);push(p.n,styl(p,fill(pk(EV[e.t]||EV.idle),p).replace(/\{o\}/g,e.o||'someone')),0)}
+const chatHtml=()=>S.chat.slice(0,40).slice().reverse().map(c=>`<div><span class="m">${esc(c.t)}</span> <b style="color:${c.me?'#00e':'#333'}">${esc(c.w)}</b>: ${esc(c.m)}</div>`).join('')||'<i>Quiet...</i>';
+const bestName=(k,v)=>{const c=Object.values(GEAR).filter(g=>g.k===k&&g.v<=v).sort((a,b)=>b.v-a.v)[0];return c?c.n:'none'};
 function av(a,w){w=w||100;const sk=SKIN[a.skin%5],hc=HAIRC[a.hairc%5],C=id=>id&&CLOTH[id]?CLOTH[id].c:'#0000',th=a.hat==='tophat';
  return`<svg viewBox="0 0 100 160" width="${w}"><rect x="36" y="95" width="12" height="50" fill="${C(a.pants)}"/><rect x="52" y="95" width="12" height="50" fill="${C(a.pants)}"/><rect x="34" y="145" width="16" height="8" fill="#333"/><rect x="50" y="145" width="16" height="8" fill="#333"/><rect x="30" y="50" width="40" height="45" fill="${C(a.top)}"/><rect x="22" y="52" width="9" height="36" fill="${C(a.top)}"/><rect x="69" y="52" width="9" height="36" fill="${C(a.top)}"/><circle cx="50" cy="28" r="14" fill="${sk}"/>`+
  (a.hair===1?`<path d="M36 24a14 12 0 0 1 28 0z" fill="${hc}"/>`:a.hair===2?`<path d="M35 26a15 14 0 0 1 30 0v22h-6v-18h-18v18h-6z" fill="${hc}"/>`:a.hair===3?`<rect x="46" y="8" width="8" height="14" fill="${hc}"/>`:'')+
  (a.beard===1?`<path d="M38 32q12 8 24 0v4q-12 8-24 0z" fill="${hc}" opacity=".5"/>`:a.beard===2?`<path d="M36 28q14 22 28 0v14q-14 14-28 0z" fill="${hc}"/>`:'')+
  (a.hat?`<rect x="${th?40:36}" y="${th?1:10}" width="${th?20:28}" height="${th?19:10}" fill="${C(a.hat)}"/><rect x="33" y="18" width="34" height="4" fill="${C(a.hat)}"/>`:'')+
  (a.acc==='glasses'||a.acc==='shades'?`<rect x="38" y="24" width="24" height="5" fill="${C(a.acc)}"/>`:a.acc==='scarf'?`<rect x="36" y="40" width="28" height="8" fill="${C(a.acc)}"/>`:a.acc==='chain'?`<rect x="40" y="52" width="20" height="3" fill="${C(a.acc)}"/>`:'')+'</svg>'}
-
+const gangLink=()=>{const g=gangOf();return g?GO(esc(g.n),'gang:'+g.id)+' ('+(S.gRank||'Member')+')':'None'};
+Object.assign(A,{
+ joinGang(id){id=+id;const g=S.gangs.find(x=>x.id===id);if(!g)return'No such gang.';if(S.gang&&!cz('reqs'))return'Leave your current gang first.';if(S.lv<g.min&&!cz('reqs'))return g.n+' requires level '+g.min+'.';
+  S.gang=id;S.gRank='Member';S.invites=S.invites.filter(x=>x!==id);S.evq.push({t:'join'});lg('Joined '+g.n+'.','g');return'You joined '+g.n+'!'},
+ leaveGang(){const g=gangOf();if(!g)return'You are not in a gang.';if(!confirm(g.me?'You lead this gang. Leaving disbands it.':'Leave '+g.n+'?'))return'';
+  if(g.me){S.players.forEach(p=>{if(p.gang===g.id)p.gang=0});S.gangs=S.gangs.filter(x=>x!==g)}S.gang=0;S.gRank='';return'You left the gang.'},
+ mkGang(){const n=String(document.getElementById('gname').value).trim().slice(0,24);if(S.gang)return'Leave your gang first.';if(n.length<3)return'Name must be 3+ characters.';if(S.gangs.some(g=>g.n.toLowerCase()===n.toLowerCase()))return'Name taken.';
+  if(S.lv<5&&!cz('reqs'))return'Need level 5 to found a gang.';if(S.cash<5000)return'Founding costs $5,000.';S.cash-=5000;
+  const id=Math.max(0,...S.gangs.map(g=>g.id))+1;S.gangs.push({id,n,c:'#'+rnd(0x444,0xbbb).toString(16),th:'Founded by '+S.name,lv:1,xp:0,tr:0,min:1,rv:pk(S.gangs).id,wins:0,loss:0,lead:0,me:true,hist:'Founded today.',feed:[]});S.gang=id;S.gRank='Leader';lg('Founded '+n,'g');return'Gang founded! Unaffiliated hobos may apply over time.'},
+ promote(id){const g=gangOf();if(!g||!g.me)return'Only the leader can do that.';const p=S.players.find(x=>x.id===+id&&x.gang===g.id);if(!p)return'Not a member.';p.gr=p.gr?'':'officer';return p.n+(p.gr?' promoted to officer.':' demoted.')},
+ kick(id){const g=gangOf();if(!g||!g.me)return'Only the leader can do that.';const p=S.players.find(x=>x.id===+id&&x.gang===g.id);if(!p)return'Not a member.';p.gang=0;p.gr='';return p.n+' was removed.'},
+ gdon(){const g=gangOf();if(!g)return'No gang.';const a=Math.floor(Number(document.getElementById('gd').value));if(!(a>0))return'Enter an amount.';if(a>S.cash)return'Not enough cash.';S.cash-=a;g.tr+=a;g.xp+=a/10;while(g.xp>=1000*g.lv){g.xp-=1000*g.lv;g.lv++;g.feed.unshift('Gang reached level '+g.lv)}
+  members(g).slice(0,3).forEach(p=>p.mem.fav++);S.evq.push({t:'don'});return'Donated '+money(a)+'. Gang level '+g.lv},
+ borrow(id){const g=gangOf(),it=GEAR[id];if(!g||!it)return'Not available.';if(it.lv>g.lv*4+2&&!cz('reqs'))return'Gang level too low.';if(S.armory[id])return'Already borrowed.';if(invN()>=cap()&&!cz('reqs'))return'Backpack full.';const c=Math.ceil(it.p/10);if(g.tr<c)return'Treasury too low.';g.tr-=c;S.armory[id]=true;S.inv[id]=(S.inv[id]||0)+1;g.feed.unshift(S.name+' borrowed '+it.n);return'Borrowed '+it.n+' (costs the gang '+money(c)+')'},
+ say(){const g=gangOf();if(!g)return'Join a gang first.';const el=document.getElementById('cm'),t=String(el?el.value:'').trim().slice(0,200);if(!t)return'Type a message.';push(S.name,t,1);const M=members(g);S.lastChat=Date.now();if(!M.length)return'Nobody else is in the gang yet.';
+  const wt=p=>({social:3,joker:3,'trash-talker':3,leader:2,competitive:2,casual:2,helpful:2,veteran:2,collector:1,beginner:1,quiet:.3})[p.pers]||1,pool=M.slice(),n=Math.random()<.45?2:1;
+  for(let i=0;i<n&&pool.length;i++){let s=pool.reduce((a,p)=>a+wt(p),0)*Math.random(),k=0;for(;k<pool.length-1;k++){s-=wt(pool[k]);if(s<=0)break}const p=pool.splice(k,1)[0];p.mem.chats++;push(p.n,reply(p,t),0)}return''},
+ pm(id){const p=S.players.find(x=>x.id===+id);if(!p)return'';const el=document.getElementById('pmt'),t=String(el?el.value:'').trim().slice(0,200);if(!t)return'Type a message.';
+  const k=String(p.id);if(!S.pms[k]){if(Object.keys(S.pms).length>=40)delete S.pms[Object.keys(S.pms)[0]];S.pms[k]=[]}p.mem.chats++;S.pms[k].push({w:S.name,m:t,me:true},{w:p.n,m:reply(p,t),me:false});S.pms[k]=S.pms[k].slice(-20);return''},
+ chatset(v){S.set.chat=+v;return'Chat activity updated.'},
+ buyRat(t){const r=RATS[t];if(!r)return'Unknown.';if(S.lv<r.lv&&!cz('reqs'))return'Requires level '+r.lv+'.';if(S.rats.length>=ratCap()&&!cz('reqs'))return'Your cages are full ('+ratCap()+').';if(S.cash<r.p)return'Not enough cash.';S.cash-=r.p;addRat(t);return'Bought a '+r.n+'.'},
+ trainRat(id){const r=S.rats.find(x=>x.id===+id);if(!r)return'No such rat.';if(S.T<5&&!cz('T'))return'Need 5T.';const c=r.lv*10;if(S.cash<c)return'Training costs '+money(c);S.cash-=c;spendT(5);const k=['spd','pow','str'][rnd(0,2)];r[k]=+(r[k]+rf(.3,.7)).toFixed(2);if(++r.xp>=r.lv*5){r.xp=0;r.lv++;r.spd++;r.pow++;r.str++}return r.nm+' trained '+k+'.'},
+ setRat(id){S.rat=+id===S.rat?0:+id;return S.rat?'Rat is now your fighting partner.':'Rat stowed.'},
+ release(id){if(!confirm('Release this rat for good?'))return'';S.rats=S.rats.filter(r=>r.id!==+id);if(S.rat===+id)S.rat=0;return'Released.'},
+ rename(id){const r=S.rats.find(x=>x.id===+id);if(!r)return'';const n=prompt('New name?',r.nm);if(n&&n.trim())r.nm=n.trim().slice(0,16);return'Renamed.'},
+ buyCage(){if(S.cages>=7)return'Max cages reached.';const c=2000*S.cages;if(S.cash<c)return'Cage costs '+money(c);S.cash-=c;S.cages++;return'Cage added.'},
+ ptCage(){if(S.cages>=7)return'Max cages reached.';if(S.pts<15)return'Needs 15 points.';S.pts-=15;S.cages++;tx('15 points -> cage');return'Cage added.'},
+ packUp(){const u=PACK[S.pack];if(!u)return'Backpack is maxed.';if(S.lv<u[1]&&!cz('reqs'))return'Requires level '+u[1]+'.';if(S.cash<u[0])return'Costs '+money(u[0]);S.cash-=u[0];S.pack++;return'Backpack upgraded: '+cap()+' slots.'},
+ discard(id){if(!S.inv[id])return'You do not own that.';if(!confirm('Discard one '+GEAR[id].n+'?'))return'';if(--S.inv[id]<=0){delete S.inv[id];for(const k in S.eq)if(S.eq[k]===id)S.eq[k]=null}return'Discarded.'},
+ donate(k){const now=Date.now(),D=864e5,lgd=m=>S.donLog.unshift(new Date().toLocaleString()+': '+m);
+  if(k==='buy'){if(S.pts<100)return'Needs 100 points (approximate price).';S.pts-=100;S.don=Math.max(S.don,now)+31*D;S.donOn=1;lgd('Bought 31 days with 100 points');return'Donator for 31 more days!'}
+  if(!S.set.sandbox)return'Enable sandbox mode for free activation.';
+  if(k==='sb31'){S.don=Math.max(S.don,now)+31*D;S.donOn=1;lgd('Sandbox: +31 days');return'+31 days.'}
+  if(k==='perm'){S.donP=true;lgd('Sandbox: permanent');return'Permanent donator status.'}
+  if(k==='off'){S.donP=false;S.don=0;S.donOn=0;lgd('Sandbox: deactivated');return'Deactivated.'}return''},
+ look(a){const[k,v]=a.split('|');if(!['skin','hair','hairc','beard'].includes(k))return'';S.app[k]=Math.min(4,Math.max(0,+v));return'Appearance updated.'},
+ wear(id){if(id.startsWith('-')){S.app[id.slice(1)]='';return'Removed.'}const c=CLOTH[id];if(!c)return'';if(!owned(id))return'You do not own that.';S.app[c.k]=id;return'Wearing '+c.n},
+ buyCloth(id){const c=CLOTH[id];if(!c)return'';if(owned(id))return'Already owned.';if(c.d&&!don()&&!cz('reqs'))return'Donator only.';if(c.u==='P'){if(S.pts<c.p)return'Needs '+c.p+' points.';S.pts-=c.p}else{if(S.cash<c.p)return'Costs '+money(c.p);S.cash-=c.p}S.wardrobe[id]=true;S.app[c.k]=id;return'Bought and wearing '+c.n},
+ edit(){if(!S.set.sandbox)return'Enable sandbox mode.';const g=k=>{const e=document.getElementById('e_'+k);return e?Number(e.value):NaN},bad=[];
+  for(const k of ['spd','pow','str','int','beg','resp','cash','bank','tok','pts']){const v=g(k);if(!Number.isFinite(v)||v<0){bad.push(k);continue}S[k]=v}
+  const lv=Math.floor(g('lv'));if(lv>=1){S.lv=Math.min(lv,9999);S.hp=mhpOf(S.lv)}const xp=Math.floor(g('xp'));if(xp>=0)S.xp=Math.min(xp,need(S.lv)-1);return bad.length?'Invalid: '+bad.join(', '):'Stats applied.'},
+ give(m){if(!S.set.sandbox)return'Enable sandbox mode.';const[t,id]=document.getElementById('gv').value.split(':'),d=m==='take'?-1:1;
+  if(t==='g'&&GEAR[id]){S.inv[id]=(S.inv[id]||0)+d;if(S.inv[id]<=0){delete S.inv[id];for(const k in S.eq)if(S.eq[k]===id)S.eq[k]=null}}
+  else if(t==='f'&&FOOD[id]){S.food[id]=(S.food[id]||0)+d;if(S.food[id]<=0)delete S.food[id]}
+  else if(t==='r'&&RATS[id]){if(d>0)addRat(id);else{const r=S.rats.find(x=>x.t===id);if(r){S.rats=S.rats.filter(x=>x!==r);if(S.rat===r.id)S.rat=0}}}
+  else if(t==='c'&&CLOTH[id]){if(d>0)S.wardrobe[id]=true;else delete S.wardrobe[id]}else return'Invalid item.';return(d>0?'Added ':'Removed ')+id},
+ unlock(){if(!S.set.sandbox)return'Enable sandbox mode.';S.map=S.trolly=S.gift=true;S.skip=false;S.school.ps=S.school.hs=S.school.uni=true;S.cages=7;S.pack=PACK.length;for(const c in CLOTH)S.wardrobe[c]=true;QUESTS.forEach(q=>S.quests[q.id]=true);return'Everything unlocked.'},
+ ctog(k){S.set.cheat[k]=!S.set.cheat[k];return k+': '+(S.set.cheat[k]?'on':'off')},
+ cheatReset(){['hp','T','meals','free','reqs','stats'].forEach(k=>S.set.cheat[k]=true);return'Sandbox toggles restored.'},
+ bet(){const a=Math.floor(Number(document.getElementById('bt').value));if(!(a>0))return'Enter a bet.';if(a>S.cash)return'Not enough cash.';if(Math.random()<.47){S.cash+=a;return'You won '+money(a)+'!'}S.cash-=a;return'You lost '+money(a)+'.'},
+ uniRoll(){if(S.lv<20&&!cz('reqs'))return'Level 20+ only.';if(S.uni.score&&S.uni.rr>=3)return'No re-rolls left today.';if(S.uni.score)S.uni.rr++;S.uni.score=Math.random()<.08?rnd(15,16):rnd(8,14);return'Puzzle score: '+S.uni.score},
+ uniTrain(st){if(S.lv<20&&!cz('reqs'))return'Level 20+ only.';if(!['int','str','pow','spd'].includes(st))return'';if(!S.uni.score)return'Solve the puzzle first.';
+  if(!S.school.uni){if(S.cash<50000)return'Entry fee is $50,000.';S.cash-=50000;S.school.uni=true}if(S.T<10&&!cz('T'))return'Need 10T.';if(S.cash<50)return'Need $50.';S.cash-=50;spendT(10);const sc=S.uni.score,g=+(rf(.4,.7)*(1+S.int/100)*6*(1+sc/100+(sc>=14?(sc-13)*.1:0))*(st==='int'?.25:1)).toFixed(3);S[st]+=g;S.ct.trains++;return'University training: +'+g+' '+st},
+ carn(){if(S.tok<100)return'Ring toss costs 100 tokens.';S.tok-=100;const r=Math.random();if(r<.4)return'Missed! Nothing.';if(r<.7){S.int+=.5;return'Won +0.5 intelligence!'}if(r<.9){S.cans+=10;return'Won 10 cans!'}if(r<.97){S.tok+=300;return'Won 300 tokens!'}S.pts+=1;return'Jackpot: 1 point!'}
+});
+function act(n,a){if(!S&&n!=='create')return;let r,keep=null,base=null;
+ try{if(S){tick();if(cz('free')&&!['edit','give','unlock'].includes(n)){keep=[S.cash,S.pts,S.tok];base=[Math.max(S.cash,1e12),Math.max(S.pts,1e6),Math.max(S.tok,1e12)];S.cash=base[0];S.pts=base[1];S.tok=base[2]}}
+  r=A[n](a);
+  if(keep&&S){['cash','pts','tok'].forEach((k,i)=>{const d=S[k]-base[i];S[k]=d>0?keep[i]+d:keep[i]})}
+  if(S){const k=myRank();if(k!==S.rk.cur){S.rk.prev=S.rk.cur||k;S.rk.cur=k}if(S.evq.length>10)S.evq.length=10;save()}}
+ catch(e){if(keep&&S){S.cash=keep[0];S.pts=keep[1];S.tok=keep[2]}r='Error: '+e.message;console.error(e)}note=r||'';render()}
+/* ===== UI ===== */
 const L=(l,a,v,x)=>`<a ${x?'class="x"':''} data-a="${a}" data-v="${esc(v==null?'':v)}">${l}</a>`;
 const GO=(l,v)=>L(l,'go',v),bk=()=>`<p>[${GO('Back to City','city')}]</p>`;
 const bar=(v,m,c)=>`<div class="bar"><i style="width:${Math.max(0,Math.min(100,v/m*100))}%;background:${c}"></i></div>`;
-
-function topbar(){
-  if(!S) return;
-  const n=new Date(),mx=mhpOf(S.lv);
-  document.getElementById('top').innerHTML=`<table><tr><td class="nav" style="width:36%"><b>Alley Wars</b></td><td class="m" style="width:20%">${n.toLocaleTimeString()}</td></tr></table>
- <table><tr><td><b>Cash</b> ${money(S.cash)}<br><b>Bank</b> ${money(S.bank)}<br><b>Points</b> ${S.pts}<br><b>Tokens</b> ${S.tok.toLocaleString()}</td><td><b>Level</b> ${S.lv}<br><b>Life</b> ${Math.round(S.hp/mx*100)}%<br><b>Awake</b> ${S.T}/100<br><b>Turns</b> ${S.turns}</td><td style="width:30%">${bar(S.xp,need(S.lv),'#555')}${bar(S.hp,mx,'#3c3')}${bar(S.T,100,'#f66')}</td></tr></table>`;
-}
-
-/* ===== VIEWS ===== */
+function topbar(){const n=new Date(),mx=mhpOf(S.lv),p=PR(),cd=S.T>=100?'':Math.max(0,Math.ceil(p.regen-(Date.now()-S.rt.rg)/1000));
+ document.getElementById('top').innerHTML=`<table><tr><td class="nav" style="width:36%">${GO('☰ Home','home')} ${GO('Backpack','pack')} ${GO('City','city')}</td><td class="m" style="width:20%">${n.toLocaleDateString([], {month:'short',day:'numeric'})}<br>${n.toLocaleTimeString()}<br>${cd!==''?'+5 awake '+cd+'s':''}</td></tr></table>
+ <table><tr><td><b>Cash</b> ${money(S.cash)}<br><b>Bank</b> ${money(S.bank)}<br><b>Points</b> ${S.pts} ${GO('[+]','points')}<br><b>Tokens</b> ${S.tok.toLocaleString()}</td><td><b>Level</b> ${S.lv}<br><b>Life</b> ${Math.round(S.hp/mx*100)}%<br><b>Awake</b> ${S.T}/100<br><b>Turns</b> ${S.set.unl?'∞':S.turns}</td><td style="width:30%">${bar(S.xp,need(S.lv),'#555')}${bar(S.hp,mx,'#3c3')}${bar(S.T,100,'#f66')}</td></tr></table>`}
+function atkRange(){const lo=S.lv<=15?1:S.lv<=40?10:25;return Math.max(lo,S.lv-200)+' ~ '+(S.lv+200)}
 const V={
-home(){const mx=mhpOf(S.lv);
- return`<div class="box"><b>My Hobo</b> · Main · ${GO('Food','food')} · ${GO('Backpack','pack')} · ${GO('Appearance','appear')} · ${GO('Donator','don')}</div>
- <div class="col"><div>${av(S.app,110)}</div><div style="flex:2"><b>Name:</b> ${esc(S.name)} (${S.id})<br><b>Gang:</b> ${S.gang?S.gang:'None'}<br><b>Level:</b> ${S.lv}<br><b>Exp:</b> ${S.xp}/${need(S.lv)}<br>
- <b>Life:</b> ${Math.ceil(S.hp)}/${mx}<br><b>Awake:</b> ${S.T}/100<br><b>Cans:</b> ${S.cans}<br><b>Tokens:</b> ${S.tok.toLocaleString()}</div></div>`},
-pack(){return`<h2>Backpack</h2><p>Items in pack: ${invN()}/${cap()}</p>${Object.keys(S.inv).length?Object.keys(S.inv).map(i=>`<div>${GEAR[i].n} x${S.inv[i]}</div>`).join(''):'<i>Empty backpack.</i>'}`},
-city(){return`<h2>City</h2><div class="col"><div><b>Locations</b><br>• ${GO('Hobo Meeting Area','fight')}<br>• ${GO('Can Depot','loc:depot')}<br>• ${GO('Toy Store','loc:toy')}<br>• ${GO('Gangs Alley','alley')}</div></div>`},
-fight(){return`<h2>Hobo Meeting Area</h2><p>Challenge local simulated hobos!</p><div class="box"><button data-a="fight_sim">Battle Random Rival (5 Awake)</button></div>`},
-chat(){return`<h2>Gang Chat</h2><div class="box log"><div>[System] Offline simulation active.</div></div><input id="cm" placeholder="Say something..."><button data-a="say">Send</button>`}
-};
-
+home(){const mx=mhpOf(S.lv),c=myCombat(),tot=ev(S.spd)+ev(S.pow)+ev(S.str),rk=S.rk,all=S.players.length+1,wl=S.bat.w+S.bat.l,pc=n=>tot?f2(ev(n)/tot*100):'0.00';
+ const slot=(k,l)=>`<b>${l}</b><br><i>${S.eq[k]?GEAR[S.eq[k]].n:'None'}</i><br>${S.eq[k]?'['+L('remove','unequip',k)+']':'['+GO('Buy','toy')+']'}<br><br>`;
+ return`<div class="box"><b>My Hobo</b> · Main · ${GO('Food ('+Object.values(S.food).reduce((a,b)=>a+b,0)+')','food')} · ${GO('Backpack','pack')} · ${GO('Logs','log')} · ${GO('Appearance','appear')} · ${GO('Rats','pet')} · ${GO('Donator','don')} · ${GO('Settings','settings')}</div>
+ <div class="col"><div>${portrait()}</div><div style="flex:2"><b>Name:</b> ${esc(S.name)} (${S.id})<br><b>Gang:</b> ${gangLink()}<br><b>Level:</b> ${S.lv} <span class="m">(Attack Range: ${atkRange()})</span><br><b>Exp:</b> ${S.xp}/${need(S.lv)} (${Math.floor(S.xp/need(S.lv)*100)}%)<br>
+ <b>Life:</b> ${Math.ceil(S.hp)}/${mx} <span class="${S.hp>0?'g':'r'}">(${Math.round(S.hp/mx*100)}%)</span> ${dead()?'<b class="r">DEAD</b> ['+GO('hospital','loc:hosp')+']':''}<br><b>Awake:</b> <span class="g">${S.T}</span>/100<br><b>Meals Left:</b> <span class="g">${cz('meals')?'∞':S.meals+'/5'}</span><br>
+ <b>Cans:</b> ${S.cans}<br><b>Tokens:</b> ${S.tok.toLocaleString()}<br><b>Intelligence:</b> ${f2(S.int)}<br><b>Begging:</b> ${S.beg.toFixed(4)}<br><b>Respect:</b> Hobo (${S.resp})
+ <p><u><b>Combat Stats</b></u><br>Speed: ${f2(S.spd)} (${pc(S.spd)}%)<br>Power: ${f2(S.pow)} (${pc(S.pow)}%)<br>Strength: ${f2(S.str)} (${pc(S.str)}%)<br>Total: ${f2(S.spd+S.pow+S.str)}<br>
+ <span class="m">Damage ${f2(c.dmg[0])}~${f2(c.dmg[1])} · Defense ${f2(c.def[0])}~${f2(c.def[1])} · Speed ${f2(c.spd[0])}~${f2(c.spd[1])}</span></p>
+ <p><u><b>Battle Records</b></u> [${GO('Battle Log','log')}]<br><b>Current Rank:</b> ${rk.cur||myRank()} of ${all} ${rk.prev>rk.cur?'<span class="g">▲</span>':rk.prev<rk.cur?'<span class="r">▼</span>':''}<br><b>Battles:</b> ${wl}<br><b>Wins/Losses:</b> <span class="g">${S.bat.w}</span>/<span class="r">${S.bat.l}</span> (${wl?Math.round(S.bat.w/wl*100):0}%)<br><b>Last Win:</b> ${S.bat.lw?esc(S.bat.lw):'N/A'}<br><b>Last Loss:</b> ${S.bat.ll?esc(S.bat.ll):'N/A'}</p></div>
+ <div class="box" style="text-align:center">${slot('wep','Weapon')}${slot('arm','Armor')}${slot('ring','Ring')}${GO('View List','pack')}</div></div>
+ <ul>${S.map?'':'<li>'+GO('Buy a city map ($10)','buyMap')+' to explore.</li>'}<li>${S.gang?GO('Gang chat','chat'):GO('Find a gang','alley')+' - gangs lend gear and boost begging.'}</li><li>You can still eat ${S.meals} more meals. ${GO('[eat]','food')}</li><li>Piggy bank: <input id="amt" size="7" placeholder="amount"> ${L('Deposit','bank','dep')} ${L('Withdraw','bank','wd')}</li></ul>`},
+food(){const ids=cz('meals')?Object.keys(FOOD):Object.keys(S.food);return`<h2>Food</h2><p class="m">Eat up to 5 meals per day. Cannot eat at 100T. Meals left: ${S.meals}</p>${ids.length?ids.map(i=>`<div>${FOOD[i].n} ×${S.food[i]||'∞'} (+${FOOD[i].t}T) ${L('[eat]','eat',i)}</div>`).join(''):'<i>No food. Explore the city (needs a trolly) or visit WalMart.</i>'}<p>[${GO('Back','home')}]</p>`},
+pack(){const by=window._srt||'id',ids=Object.keys(S.inv).sort((a,b)=>by==='name'?GEAR[a].n.localeCompare(GEAR[b].n):by==='type'?GEAR[a].k.localeCompare(GEAR[b].k):by==='val'?GEAR[b].v-GEAR[a].v:a<b?1:-1);
+ return`<h2>Backpack</h2>${ids.length?`<table class="t"><tr><th>Item</th><th>Type</th><th>Bonus</th><th></th></tr>${ids.map(i=>{const g=GEAR[i],on=S.eq[g.k]===i;return`<tr><td>${g.n} ×${S.inv[i]} ${on?'<b class="g">(worn)</b>':''}</td><td>${g.k}</td><td>${g.k==='ring'?'+'+g.v*5+'% EXP':g.k==='wep'?'+'+g.v+' damage':'+'+g.v+' defense'}</td><td>${on?L('remove','unequip',g.k):L('equip','equip',i)} ${L('sell $'+Math.floor(g.p*.4),'sellgear',i)}</td></tr>`}).join('')}</table>`:'<i>Your backpack is empty...</i>'}
+ <p>Sort by: ${['id','name','type','val'].map(x=>L(x,'sort',x)).join(' · ')}</p><p class="m">Trolly: ${S.trolly?'yes':'no (get one from Duncan)'} · Food stored in ${GO('Food','food')}</p>`},
+city(){const col=k=>{const d=DIST[k];return`<div><b style="color:${d[1]}">${d[0]}</b><br>${d[2].map(([id,n])=>'• '+(['rank'].includes(id)?GO(n,'rank'):id==='home'?GO(n,'home'):id==='mail'?GO(n+(S.mail?' (1)':''),'mail'):id==='fight'?GO(n+' - Start a fight','fight'):GO(n,'loc:'+id))).join('<br>')}</div>`};
+ return`<h2>City</h2><div class="m">Not yet built (stage 2+): Gangs Alley, Pet Shop, University, Traveling Carnival, Big House.</div><div class="col">${col('N')}${col('W')}${col('E')}${col('S')}</div><p>[${GO('Explore the city','explore')}] · ${GO('Points','points')} · ${GO('Settings','settings')}</p>`},
+explore(){const N=CONFIG.gridN,vs=new Set(S.visited);let g='';for(let dy=-5;dy<=5;dy++)for(let dx=-5;dx<=5;dx++){const x=S.pos.x+dx,y=S.pos.y+dy;g+=`<i class="${!dx&&!dy?'p':x>=0&&y>=0&&x<N&&y<N&&vs.has(x*N+y)?'v':''}">${!dx&&!dy?'☺':x<0||y<0||x>=N||y>=N?'×':''}</i>`}
+ const mv=(l,d)=>`<button data-a="move" data-v="${d}">${l}</button>`;
+ return`<h2>Explore the City</h2>${S.map?`<p>Position (${S.pos.x},${S.pos.y}) of ${N}×${N} · Turns left: <b>${S.set.unl?'∞':S.turns}</b> · Cans: ${S.cans}</p><div class="grid">${g}</div>
+ <div>${mv('↖','-1,-1')}${mv('↑','0,-1')}${mv('↗','1,-1')}<br>${mv('←','-1,0')}<button disabled>•</button>${mv('→','1,0')}<br>${mv('↙','-1,1')}${mv('↓','0,1')}${mv('↘','1,1')}</div>
+ <p class="m">${S.trolly?'You are pushing a trolly.':'No trolly: cans and food cannot be collected. Visit Duncan.'} Trade points for turns: ${GO('Points','points')}</p>
+ <h2>Recent finds</h2><div class="log">${S.finds.map(f=>`<div>${f.t} ${esc(f.m)}</div>`).join('')||'None yet.'}</div>`:`<p>You need a city map ($${CONFIG.mapCost}). ${L('Buy it','buyMap')}</p>`}<p>[${GO('Back to City','city')}]</p>`},
+fight(){const lo=S.lv<=15?1:S.lv<=40?10:25,list=S.players.filter(p=>Math.abs(p.lv-S.lv)<=(window._fr||0)&&p.lv>=lo).sort((a,b)=>b.id-a.id).slice(0,30);
+ return`<h2>Hobo Meeting Area</h2><p class="m">Fight costs ${CONFIG.fightT}T (approx). Showing simulated hobos within ±${window._fr||0} levels. ${[0,2,5,10].map(x=>L('±'+x,'fr',x)).join(' ')}</p>
+ ${S.lastFight?`<div class="box log">${S.lastFight.map(esc).join('<br>')}</div>`:''}
+ ${list.length?`<table class="t"><tr><th>Hobo</th><th>Lv</th><th>Win%</th><th>Cash</th><th></th></tr>${list.map(p=>`<tr><td>${GO(esc(p.n),'prof:'+p.id)}</td><td>${p.lv}</td><td>${Math.round(p.w/Math.max(1,p.w+p.l)*100)}%</td><td>${money(p.cash)}</td><td>${L('Attack','fight',p.id)}</td></tr>`).join('')}</table>`:'<i>No hobos at that level range.</i>'}<p>[${GO('Back to City','city')}]</p>`},
+prof(){const p=S.players.find(x=>x.id===+window._pid);if(!p)return'<p>Not found.</p>'+bk();const rl=rankList(),rk=rl.findIndex(x=>x.id===p.id)+1;
+ return`<h2>${esc(p.n)} (${p.id})</h2><p><b>Level:</b> ${p.lv}<br><b>Rank:</b> ${rk} of ${rl.length}<br><b>Speed/Power/Strength:</b> ${f2(p.spd)} / ${f2(p.pow)} / ${f2(p.str)}<br><b>Weapon/Armor bonus:</b> ${p.wp} / ${p.ar}<br><b>Cash:</b> ${money(p.cash)}<br><b>Wins/Losses:</b> ${p.w}/${p.l}<br><b>Last active:</b> ${new Date(p.act).toLocaleString()}</p><p class="m">Simulated offline character, not a real player.</p>${L('Attack','fight',p.id)}<p>[${GO('Back','fight')}]</p>`},
+rank(){const t=window._rt||'lv',rl=rankList(),s={lv:rl,cb:rl.slice().sort((a,b)=>b.spd+b.pow+b.str-(a.spd+a.pow+a.str)),w:rl.slice().sort((a,b)=>b.w-a.w)}[t];
+ return`<h2>Top Hobos</h2><p>${L('Level','rt','lv')} · ${L('Combat','rt','cb')} · ${L('Wins','rt','w')}</p><table class="t"><tr><th>#</th><th>Hobo</th><th>Lv</th><th>Stats</th><th>W/L</th></tr>${s.slice(0,25).map((p,i)=>`<tr ${p.me?'style="background:#ffd"':''}><td>${i+1}</td><td>${p.me?esc(p.n):GO(esc(p.n),'prof:'+p.id)}</td><td>${p.lv}</td><td>${f2(p.spd+p.pow+p.str)}</td><td>${p.w}/${p.l}</td></tr>`).join('')}</table><p>You are #${s.findIndex(p=>p.me)+1} of ${s.length}.</p><p>[${GO('Back to City','city')}]</p>`},
+points(){return`<h2>Points & Tokens</h2><p>Points: <b>${S.pts}</b> · Tokens: <b>${S.tok.toLocaleString()}</b> (separate currencies)</p><table class="t">
+ <tr><td>1 point → 25 explore turns (${S.ptr}/10 today)</td><td>${L('Trade','tTurns')}</td></tr><tr><td>5 points → 100T refill (${S.tref}/2 today)</td><td>${L('Trade','tRef')}</td></tr><tr><td>50,000 tokens → +50T (${S.tokref}/1 today)</td><td>${L('Trade','tTok')}</td></tr></table>
+ ${S.set.sandbox?`<div class="box"><b>Sandbox grants</b> (offline only, logged)<br>${L('+10 points','gr','pts')} · ${L('+100k tokens','gr','tok')} · ${L('+$100k','gr','cash')} · ${L('+100 turns','gr','turns')} · ${L('Refill T','gr','T')}</div>`:'<p class="m">Enable sandbox mode in Settings for free grants.</p>'}
+ <h2>History</h2><div class="log">${S.tx.map(x=>`<div>${x.t} ${esc(x.m)}</div>`).join('')||'None.'}</div>`},
+log(){return`<h2>Logs</h2><div class="log">${S.log.map(l=>`<div class="${l.c}">${esc(l.t)} ${esc(l.m)}</div>`).join('')}</div>`},
+mail(){S.mail=0;return`<h2>Mail Box</h2><div class="box"><b>Subject: Welcome!</b><p>Welcome to the alley. Explore the city and sell cans at the Can Depot for starter cash, join the fights at the Hobo Meeting Area, and visit Duncan's House on the south side for coaching. Everything here is a private offline simulation.</p></div>`},
+settings(){const s=S.set;return`<h2>Settings</h2><div class="box"><b>Pacing</b> (awake regen / day length / daily turns)<br>${Object.entries(CONFIG.presets).map(([k,p])=>`${s.pace===k?'<b>':''}${L(k,'pace',k)}${s.pace===k?'</b>':''} (+5T/${p.regen}s, ${p.reset}s, ${p.turns})`).join('<br>')}<p>${L('Start new day now','newday')}</p></div>
+ <div class="box">Simulated world: ${[0,1,3].map(x=>s.sim===x?'<b>'+(x?'x'+x:'paused')+'</b>':L(x?'x'+x:'pause','sim',x)).join(' · ')}<br>${L('Defeat protection: '+(s.protect?'ON':'OFF'),'toggle','protect')}<br>${L('Unlimited exploring: '+(s.unl?'ON':'OFF'),'toggle','unl')}<br>${L('Sandbox mode: '+(s.sandbox?'ON':'OFF'),'toggle','sandbox')}</div>
+ <div class="box">Gang chat activity: ${[0,1,2].map(x=>s.chat===x?'<b>'+['off','normal','chatty'][x]+'</b>':L(['off','normal','chatty'][x],'chatset',x)).join(' · ')}<br>${s.sandbox?GO('Open sandbox controls','sandbox'):''}</div><div class="box">${memOnly?'⚠ Storage unavailable: use Export. ':'Autosaves after each action. '}<br><button data-a="export">Export JSON</button> <input type="file" id="imp" accept=".json"><br><br>${L('Delete character / new game','resetAll')}</div>`}};
 const LOC={
-depot(){return`<h2>Can Depot</h2><p>You have <b>${S.cans}</b> cans.</p><button data-a="sell_cans">Sell All Cans</button>`},
-toy(){return`<h2>Toy Store</h2><p>Buy basic weapons and armor.</p>${Object.entries(GEAR).slice(0,5).map(([id,g])=>`<div>${g.n} ($${g.p}) <button data-a="buy" data-v="${id}">Buy</button></div>`).join('')}`}
-};
-
-function render(){
-  const el=document.getElementById('c');
-  if(!S) load();
-  topbar();
-  
-  // Update Bottom Nav Active Class
-  document.querySelectorAll('.nav-item').forEach(function(item) {
-    if(item.getAttribute('data-v') === view) item.classList.add('active');
-    else item.classList.remove('active');
-  });
-
-  let h='';
-  const[vw,id]=view.split(':');
-  if(vw==='loc') h=LOC[id]?LOC[id]()+bk():'';
-  else h=V[vw]?V[vw]():V.home();
-  
-  el.innerHTML=(note?`<div class="box"><b>${esc(note)}</b></div>`:'')+h;
-}
-
-/* ===== ROBUST EVENT DELEGATION ===== */
-document.addEventListener('click', function(e) {
-  var target = e.target.closest('[data-a], [data-v], a, button');
-  if(!target) return;
-
-  var action = target.getAttribute('data-a') || target.dataset.a;
-  var val = target.getAttribute('data-v') || target.dataset.v;
-
-  note = '';
-
-  if(action === 'go' || (val && !action)) {
-    e.preventDefault();
-    view = val || action;
-    window.scrollTo(0,0);
-    render();
-    return;
-  }
-
-  if(action === 'fight_sim') {
-    if(S.T < 5) note = 'Not enough Awake!';
-    else {
-      S.T -= 5;
-      S.xp += 15;
-      S.cash += 20;
-      note = 'Won the battle! +15 XP, +$20';
-    }
-  } else if(action === 'sell_cans') {
-    var payout = S.cans * 5;
-    S.cash += payout;
-    note = 'Sold ' + S.cans + ' cans for $' + payout;
-    S.cans = 0;
-  } else if(action === 'buy' && GEAR[val]) {
-    if(S.cash < GEAR[val].p) note = 'Not enough cash!';
-    else {
-      S.cash -= GEAR[val].p;
-      S.inv[val] = (S.inv[val] || 0) + 1;
-      note = 'Bought ' + GEAR[val].n;
-    }
-  }
-
-  save();
-  render();
-});
-
-load();
-render();
+duncan(){const q=QUESTS.map(x=>`<tr><td>${x.n}</td><td>${money(x.c)}</td><td>${S.quests[x.id]?'✓':S.skip?'skipped':x.ok(S)?L('Claim','quest',x.id):'...'}</td></tr>`).join('');
+ return`<h2>Duncan's House</h2>${S.gift?'':`<p><b>Duncan:</b> "The Old Man runs this city. He wants you to prove yourself. I'm your coach. Here, take this to help you out."</p><p>> ${L('Oh cool! Free stuff!','gift')}</p>`}
+ ${S.gift?`<p><b>Duncan:</b> "Do these and I'll make it worth your while."</p><table class="t">${q}</table>`:''}${S.gift||S.skip?'':`<p>If you skip the intro quests you get no rewards. > ${L('Skip Intro Adventures','skipIntro')}</p>`}`},
+toy(){const sec=k=>Object.entries(GEAR).filter(([,g])=>g.k===k).map(([i,g])=>`<tr><td>${g.n}</td><td>${k==='ring'?'+'+g.v*5+'% EXP':'+'+g.v}</td><td>${money(g.p)}</td><td>${L('Buy','buy',i)}</td></tr>`).join('');
+ return`<h2>Toy Store</h2><p class="m">Inventory/prices are approximations.</p><table class="t"><tr><th colspan=4>Weapons (damage)</th></tr>${sec('wep')}<tr><th colspan=4>Armor (defense)</th></tr>${sec('arm')}<tr><th colspan=4>Rings</th></tr>${sec('ring')}</table>`},
+walmart(){return`<h2>WalMart</h2><p>Food (needs a trolly; max 20 items).</p><table class="t">${Object.entries(FOOD).map(([i,f])=>`<tr><td>${f.n} (+${f.t}T)</td><td>${money(f.p)}</td><td>${L('Buy','buy',i)}</td></tr>`).join('')}</table>`},
+depot(){const p=canPrice(S.lv,S.int);return`<h2>Can Depot</h2><p>You have <b>${S.cans}</b> cans. Price per can: <b>$${p}</b> (rises with level and intelligence).</p><p>Sell <input id="qty" size="5" value="${S.cans}"> cans ${L('Sell','sell')}<br><span class="m">Full sale pays ${money(p*S.cans)}.</span></p><h2>Sales record</h2><div class="log">${S.sales.map(x=>`<div>${x.t} ${esc(x.m)}</div>`).join('')||'None.'}</div>`},
+hosp(){const mx=mhpOf(S.lv),c=dead()?0:Math.ceil(mx-S.hp);return`<h2>Hospital</h2><p>Life ${Math.ceil(S.hp)}/${mx}. ${dead()?'You are dead; revival is free.':'Healing costs $1 per missing life.'}</p><p>${L('Heal ('+money(c)+')','heal')}</p>`},
+corner(){const c=Math.round((3+S.lv*1.5)*S.beg*(1+Math.floor(S.int/50)*.1));return`<h2>Corner 7/11</h2><p>Beg for ${CONFIG.begT}T. Estimated take ≈ ${money(c)}. Begging stat: ${S.beg.toFixed(4)} (rises each beg).</p><p>${L('Beg','beg')}</p><p class="m">Begging level upgrades are not built yet.</p>`},
+ps(){return school('ps')},hs(){return school('hs')},
+board(){return`<h2>Message Board</h2><p class="m">Simulated world activity (offline):</p><div class="log">${S.feed.map(f=>`<div>${f.t} ${esc(f.m)}</div>`).join('')||'Quiet so far.'}</div>`},
+gov(){const rl=rankList(),n=rl.length,tw=rl.reduce((a,p)=>a+p.w,0),rich=rl.slice().sort((a,b)=>b.cash-a.cash)[0];
+ return`<h2>Government House</h2><h2>City Statistics</h2><p>Citizens: ${n} · Average level: ${f2(rl.reduce((a,p)=>a+p.lv,0)/n)} · Total wins: ${tw}<br>Richest on hand: ${esc(rich.n)} (${money(rich.cash)})</p><h2>City Leaders</h2>${rl.slice(0,5).map(p=>esc(p.n)+' (Lv '+p.lv+')').join('<br>')}<h2>Citizen List</h2><div class="log">${rl.map(p=>p.me?esc(p.n)+' (you)':GO(esc(p.n)+' Lv'+p.lv,'prof:'+p.id)).join(' · ')}</div>`}};
+function school(k){const s=SCHOOLS[k];return`<h2>${s.n}</h2><p>Levels ${s.lo}-${s.hi} · Cost per train: ${money(s.cash)} & ${s.t}T · Entry fee ${money(s.fee)} ${S.school[k]?'(paid)':''}<br>Training raises stats; intelligence boosts gains. (Gain sizes approximate.)</p>${[['int','Intelligence'],['str','Strength'],['pow','Power'],['spd','Speed']].map(([t,n])=>`<div>${n}: ${f2(S[t])} ${L('[train]','train',k+'|'+t)}</div>`).join('')}`}
+const sel=(k,v)=>(window['_'+k]||v);
+const flt=(k,items,def)=>items.map(([v,l])=>sel(k,def)===v?'<b>'+l+'</b>':L(l,'flt',k+'|'+v)).join(' · ');
+const rarity=g=>g.lv>=35?'epic':g.lv>=16?'rare':g.lv>=6?'uncommon':'common';
+Object.assign(V,{
+pack(){const f=sel('pf','all'),by=sel('srt','id'),ids=Object.keys(S.inv).filter(i=>f==='all'||GEAR[i].k===f).sort((a,b)=>by==='name'?GEAR[a].n.localeCompare(GEAR[b].n):by==='type'?GEAR[a].k.localeCompare(GEAR[b].k):by==='val'?GEAR[b].v-GEAR[a].v:by==='lv'?GEAR[b].lv-GEAR[a].lv:a<b?1:-1),u=PACK[S.pack];
+ return`<h2>Backpack</h2><p>Slots: <b>${invN()}/${cap()}</b>${don()?' (donator +10)':''} · ${u?L('Upgrade to '+(cap()+10)+' slots ('+money(u[0])+', Lv '+u[1]+')','packUp'):'<span class="m">Maxed out</span>'}</p>${bar(invN(),cap(),'#69c')}
+ <p class="m">Filter: ${flt('pf',[['all','All'],['wep','Weapons'],['arm','Armor'],['ring','Rings']],'all')}<br>Sort: ${flt('srt',[['id','Newest'],['name','Name'],['type','Type'],['val','Power'],['lv','Level']],'id')}</p>
+ ${ids.length?`<table class="t"><tr><th>Item</th><th>Type</th><th>Effect</th><th>Req</th><th></th></tr>${ids.map(i=>{const g=GEAR[i],on=S.eq[g.k]===i;return`<tr><td>${g.n} ×${S.inv[i]} ${on?'<b class="g">(worn)</b>':''}<br><span class="m">${rarity(g)}</span></td><td>${g.k}</td><td>${g.d}</td><td>Lv ${g.lv}</td><td>${on?L('remove','unequip',g.k):L('equip','equip',i)} ${L('sell '+money(g.p*.4),'sellgear',i)} ${L('drop','discard',i)}</td></tr>`}).join('')}</table>`:'<i>Nothing matches. Your backpack is empty...</i>'}
+ <p class="m">Trolly: ${S.trolly?'yes':'no (get one from Duncan)'} · Food: ${GO('Food','food')} · Clothes: ${GO('Clothing Stall','appear')} · Rats: ${GO('Pet Shop','pet')}</p>`},
+city(){const col=k=>{const d=DIST[k];return`<div><b style="color:${d[1]}">${d[0]}</b><br>${d[2].map(([t,n])=>'• '+GO(n+(t==='mail'&&S.mail?' (1)':''),t)).join('<br>')}</div>`};
+ return`<h2>City</h2><div class="col">${col('N')}${col('W')}<div style="text-align:center">${GO('Traveling Carnival','loc:carn')}<br><br>[${GO('Explore the city','explore')}]</div>${col('E')}${col('S')}</div><p class="m">Also: ${GO('Backpack','pack')} · ${GO('Settings','settings')}${S.set.sandbox?' · '+GO('Sandbox','sandbox'):''}</p>`},
+fight(){const m=sel('fm','same'),lo=S.lv<=15?1:S.lv<=40?10:25,q=(window._q||'').toLowerCase();
+ let list=S.players.filter(p=>(cz('reqs')||p.lv>=lo)&&Math.abs(p.lv-S.lv)<=200&&(!q||p.n.toLowerCase().includes(q)));
+ list=list.filter(p=>m==='same'?Math.abs(p.lv-S.lv)<=2:m==='lower'?p.lv<S.lv&&p.lv>=S.lv-12:m==='higher'?p.lv>S.lv&&p.lv<=S.lv+12:Math.abs(p.lv-S.lv)<=20).sort((a,b)=>Math.abs(a.lv-S.lv)-Math.abs(b.lv-S.lv)||b.id-a.id);const tot=list.length;list=list.slice(0,30);
+ const cl=['r','r','m','g'];
+ return`<h2>Hobo Meeting Area</h2><p class="m">Fight costs ${CONFIG.fightT}T. Higher-level foes pay more XP/respect (up to 3x); lower-level pay less (down to 0.5x). Opponents are simulated.</p><p>${flt('fm',[['lower','Lower'],['same','Same level'],['higher','Higher'],['all','All ±20']],'same')}</p>
+ <p>Search: <input id="qs" size="12" value="${esc(window._q||'')}"> <button data-a="search">Go</button></p>${S.lastFight?`<div class="box log">${S.lastFight.map(esc).join('<br>')}</div>`:''}
+ ${list.length?`<p class="m">${tot} found, showing ${list.length}</p><div style="overflow-x:auto"><table class="t"><tr><th>Hobo</th><th>Lv</th><th>Win%</th><th>Gang</th><th>Gear</th><th>Odds</th><th></th></tr>${list.map(p=>{const e=est(p),g=S.gangs.find(x=>x.id===p.gang);return`<tr><td>${GO(esc(p.n),'prof:'+p.id)}</td><td>${p.lv}</td><td>${Math.round(p.w/Math.max(1,p.w+p.l)*100)}%</td><td>${g?esc(g.n):'-'}</td><td>W${p.wp}/A${p.ar}</td><td class="${cl[e[1]]}">${e[0]}</td><td>${L('Attack','fight',p.id)}</td></tr>`}).join('')}</table></div>`:'<i>No hobos in that range.</i>'}<p>[${GO('Back to City','city')}]</p>`},
+prof(){const p=S.players.find(x=>x.id===+window._pid);if(!p)return'<p>Not found.</p>'+bk();const rl=rankList(),rk=rl.findIndex(x=>x.id===p.id)+1,g=S.gangs.find(x=>x.id===p.gang),pm=S.pms[String(p.id)]||[];
+ return`<h2>${esc(p.n)} (${p.id})</h2><div class="col"><div>${av(p.app,100)}</div><div style="flex:2"><b>Age/Gender:</b> ${p.age} · ${{M:'Male',F:'Female',N:'Non-binary'}[p.sx]}<br><b>Personality:</b> ${p.pers} · <b>Play style:</b> ${p.style}<br><b>Gang:</b> ${g?GO(esc(g.n),'gang:'+g.id)+(p.gr?' (officer)':g.lead===p.id?' (leader)':''):'None'}<br><b>Level:</b> ${p.lv} · <b>Rank:</b> ${rk} of ${rl.length}<br>
+ <b>Speed/Power/Strength:</b> ${f2(p.spd)} / ${f2(p.pow)} / ${f2(p.str)}<br><b>Weapon:</b> ${bestName('wep',p.wp)} (+${p.wp}) · <b>Armor:</b> ${bestName('arm',p.ar)} (+${p.ar})<br><b>Cash:</b> ${money(p.cash)}<br><b>Wins/Losses:</b> ${p.w}/${p.l} (${Math.round(p.w/Math.max(1,p.w+p.l)*100)}%)<br><b>Vs you:</b> they won ${p.mem.win}, you won ${p.mem.loss}<br><b>Last active:</b> ${new Date(p.act).toLocaleString()}</div></div>
+ <p class="m">Simulated offline character, not a real player.</p><p>${L('Attack','fight',p.id)} <span class="m">Odds: ${est(p)[0]}</span></p><h2>Recent activity</h2><div class="log">${p.hist.map(esc).join('<br>')||'Nothing recent.'}</div>
+ <h2>Private messages</h2><div class="log">${pm.map(c=>`<div><b>${esc(c.w)}</b>: ${esc(c.m)}</div>`).join('')||'None yet.'}</div><p><input id="pmt" size="26" maxlength="200"> ${L('Send','pm',p.id)}</p><p>[${GO('Back','fight')}]</p>`},
+rank(){const t=sel('rt','lv'),q=(window._q||'').toLowerCase(),pg=Number(window._pg)||0,rl=rankList(),s0={lv:rl,cb:rl.slice().sort((a,b)=>b.spd+b.pow+b.str-(a.spd+a.pow+a.str)),w:rl.slice().sort((a,b)=>b.w-a.w)}[t],mine=s0.findIndex(p=>p.me)+1;
+ const top=s0.slice(0,100).map((p,i)=>[p,i+1]).filter(([p])=>!q||p.n.toLowerCase().includes(q)),pages=Math.max(1,Math.ceil(top.length/25)),pc=Math.min(Math.max(pg,0),pages-1);
+ return`<h2>Top Hobos</h2><p>${flt('rt',[['lv','Level'],['cb','Combat'],['w','Wins']],'lv')}</p><p>Search: <input id="qs" size="12" value="${esc(window._q||'')}"> <button data-a="search">Go</button></p>
+ <p><b>Your rank: #${mine} of ${s0.length}</b>${mine>100?' (outside the top 100)':''}</p><table class="t"><tr><th>#</th><th>Hobo</th><th>Lv</th><th>Stats</th><th>W/L</th></tr>${top.slice(pc*25,pc*25+25).map(([p,i])=>`<tr ${p.me?'style="background:#ffd"':''}><td>${i}</td><td>${p.me?esc(p.n)+' (you)':GO(esc(p.n),'prof:'+p.id)}</td><td>${p.lv}</td><td>${f2(p.spd+p.pow+p.str)}</td><td>${p.w}/${p.l}</td></tr>`).join('')}</table>
+ <p>Page ${pc+1}/${pages} ${pc>0?L('◀ prev','flt','pg|'+(pc-1)):''} ${pc<pages-1?L('next ▶','flt','pg|'+(pc+1)):''}</p><p>[${GO('Back to City','city')}]</p>`},
+points(){const row=(d,b)=>`<tr><td>${d}</td><td>${b}</td></tr>`,cl=Object.entries(CLOTH).filter(([i,c])=>c.u==='P');
+ return`<h2>Points Shop</h2><p>Points: <b>${S.pts}</b> · Tokens: <b>${S.tok.toLocaleString()}</b> · Cash: ${money(S.cash)} <span class="m">(separate currencies)</span></p><table class="t">`+
+ row('1 point → 25 explore turns ('+S.ptr+'/10 today)',L('Trade','tTurns'))+row('5 points → 100T refill ('+S.tref+'/2 today)',L('Trade','tRef'))+row('50,000 tokens → +50T ('+S.tokref+'/1 today)',L('Trade','tTok'))+row('Donator, 31 days: 100 points (approx. price)',L('Buy','donate','buy'))+row('Extra rat cage: 15 points (approx.)',L('Buy','ptCage'))+
+ `</table><h2>Premium clothing</h2><table class="t">${cl.map(([i,c])=>`<tr><td>${c.n} (${c.k})${c.d?' <i>donator</i>':''}</td><td>${c.p} pts</td><td>${owned(i)?'owned':c.d&&!don()&&!cz('reqs')?'locked':L('Buy','buyCloth',i)}</td></tr>`).join('')}</table>
+ <p class="m">Points come from begging rewards, exploring finds, the carnival, or sandbox grants. Prices marked approx. are not verified.</p>${S.set.sandbox?'<p>'+GO('Sandbox controls','sandbox')+'</p>':''}<h2>History</h2><div class="log">${S.tx.map(x=>`<div>${x.t} ${esc(x.m)}</div>`).join('')||'None.'}</div>`},
+don(){const on=don(),left=S.donP?'permanent':S.don>Date.now()?Math.ceil((S.don-Date.now())/864e5)+' days left':'inactive';
+ return`<h2>Donator Status</h2><p>Status: <b class="${on?'g':'r'}">${on?'ACTIVE':'Inactive'}</b> (${left})</p><div class="box"><b>Benefits</b><ul><li>Awake regenerates 5T every 10 minutes instead of 15 (from the wiki; scaled by your pacing preset)</li><li>+10 backpack slots (approx.)</li><li>+2 rat cages (approx.)</li><li>+25% daily explore turns (approx.)</li><li>Donator-only clothing (approx.)</li></ul></div><p class="m">Local game entitlement only. No payment of any kind.</p>
+ <p>${L('Activate 31 days (100 points)','donate','buy')}</p>${S.set.sandbox?`<div class="box"><b>Sandbox</b><br>${L('Free +31 days','donate','sb31')} · ${L('Permanent','donate','perm')} · ${L('Deactivate','donate','off')}</div>`:'<p class="m">Enable sandbox mode in Settings for free activation.</p>'}<h2>History</h2><div class="log">${S.donLog.map(x=>`<div>${esc(x)}</div>`).join('')||'None.'}</div>`},
+pet(){const rc=ratCap();return`<h2>Pet Shop</h2><p>Cages: <b>${S.rats.length}/${rc}</b> ${S.cages<7?L('Buy cage ('+money(2000*S.cages)+')','buyCage'):''}</p><p class="m">Your active rat adds damage, speed and defense in fights. Rats train for 5T + cash and level up. Rat details are approximations.</p>
+ <table class="t"><tr><th>Rat</th><th>Stats</th><th>Req</th><th>Price</th><th></th></tr>${Object.entries(RATS).map(([i,r])=>`<tr><td>${r.n}<br><span class="m">${r.d}</span></td><td>${r.st[0]}/${r.st[1]}/${r.st[2]}</td><td>Lv ${r.lv}</td><td>${money(r.p)}</td><td>${L('Buy','buyRat',i)}</td></tr>`).join('')}</table>
+ <h2>My rats</h2>${S.rats.length?`<table class="t">${S.rats.map(r=>`<tr><td>${esc(r.nm)} (${RATS[r.t].n}) Lv${r.lv}${S.rat===r.id?' <b class="g">active</b>':''}</td><td>S${f2(r.spd)} P${f2(r.pow)} T${f2(r.str)}</td><td>${L('train','trainRat',r.id)} ${L(S.rat===r.id?'stow':'use','setRat',r.id)} ${L('rename','rename',r.id)} ${L('release','release',r.id)}</td></tr>`).join('')}</table>`:'<i>You have no rats. Buy one, or find strays while exploring.</i>'}<p>[${GO('Back to City','city')}]</p>`},
+appear(){const a=S.app,opt=(k,l,n)=>`<div>${l}: ${Array.from({length:n},(_,i)=>a[k]===i?'<b>'+(i+1)+'</b>':L(i+1,'look',k+'|'+i)).join(' ')}</div>`;
+ const cat=(k,l)=>`<h2>${l}</h2><table class="t">${Object.entries(CLOTH).filter(([,c])=>c.k===k).map(([i,c])=>{const w=a[k]===i,st=w?L('take off','wear','-'+k):owned(i)?L('wear','wear',i):c.d&&!don()&&!cz('reqs')?'locked (donator)':L('buy','buyCloth',i);return`<tr><td><span style="display:inline-block;width:12px;height:12px;background:${c.c}"></span> ${c.n}</td><td>${c.p?c.p+(c.u==='P'?' pts':' $'):'free'}</td><td>${st}</td></tr>`}).join('')}</table>`;
+ return`<h2>Clothing Stall</h2><div class="col"><div style="text-align:center">${av(a,130)}<br><span class="m">live preview; changes are reversible</span></div><div style="flex:2">${opt('skin','Skin',5)}${opt('hair','Hair style',4)}${opt('hairc','Hair color',5)}${opt('beard','Facial hair',3)}</div></div>${cat('hat','Hats')}${cat('top','Tops')}${cat('pants','Pants')}${cat('acc','Accessories')}<p class="m">Clothing is cosmetic only. Gear is in the ${GO('Toy Store','loc:toy')}.</p>`},
+alley(){const gs=S.gangs.map(g=>({g,pw:gPower(g),m:members(g).length})).sort((a,b)=>b.pw-a.pw),mg=gangOf();
+ return`<h2>Gangs Alley</h2><p>${mg?'You are in '+gangLink()+'.':'You are not in a gang. Gangs lend gear, boost begging and chat with you.'}</p>${S.invites.length?`<div class="box"><b>Invitations</b><br>${S.invites.map(i=>{const g=S.gangs.find(x=>x.id===i);return g?esc(g.n)+' '+L('Accept','joinGang',i):''}).join('<br>')}</div>`:''}
+ <table class="t"><tr><th>#</th><th>Gang</th><th>Lv</th><th>Members</th><th>Req</th><th>W/L</th><th></th></tr>${gs.map((x,i)=>`<tr><td>${i+1}</td><td><span style="color:${x.g.c}">■</span> ${GO(esc(x.g.n),'gang:'+x.g.id)}</td><td>${x.g.lv}</td><td>${x.m}</td><td>Lv ${x.g.min}</td><td>${x.g.wins}/${x.g.loss}</td><td>${S.gang?'':L('Apply','joinGang',x.g.id)}</td></tr>`).join('')}</table>
+ ${S.gang?'':`<div class="box"><b>Found a gang</b> ($5,000, level 5)<br><input id="gname" maxlength="24" placeholder="Gang name"> ${L('Create','mkGang')}</div>`}<p>[${GO('Back to City','city')}]</p>`},
+gang(){const g=S.gangs.find(x=>x.id===window._gid);if(!g)return'<p>No such gang.</p>';const M=members(g).sort((a,b)=>b.lv-a.lv),mine=S.gang===g.id,lead=S.players.find(p=>p.id===g.lead),rk=S.gangs.map(x=>({x,p:gPower(x)})).sort((a,b)=>b.p-a.p).findIndex(r=>r.x===g)+1,rv=S.gangs.find(x=>x.id===g.rv);
+ return`<h2 style="color:${g.c}">${esc(g.n)}</h2><p>${esc(g.th)}<br><span class="m">${esc(g.hist)}</span></p><p><b>Rank:</b> ${rk} of ${S.gangs.length} · <b>Level:</b> ${g.lv} (xp ${Math.floor(g.xp)}/${1000*g.lv}) · <b>Treasury:</b> ${money(g.tr)}<br><b>Leader:</b> ${g.me?esc(S.name)+' (you)':lead&&lead.gang===g.id?GO(esc(lead.n),'prof:'+lead.id):'vacant'} · <b>Members:</b> ${M.length}${g.me?' + you':''}<br><b>Rival:</b> ${rv?GO(esc(rv.n),'gang:'+rv.id):'none'} · <b>War record:</b> ${g.wins}/${g.loss}<br><b>Benefit:</b> members get +${(g.lv*.4).toFixed(1)}% begging cash and armory access</p>
+ <p>${mine?L('Leave gang','leaveGang')+' · '+GO('Chat','chat'):S.gang?'':L('Apply to join (Lv '+g.min+')','joinGang',g.id)}</p>
+ ${mine?`<div class="box"><b>Contribute</b> <input id="gd" size="8" value="100"> ${L('Donate','gdon')}<br><b>Armory</b> (borrow once, free; costs the treasury 10% of value)<br>${Object.entries(GEAR).filter(([,i])=>i.lv<=g.lv*4+2&&i.p<=60000).map(([i,it])=>S.armory[i]?'':L(it.n,'borrow',i)).filter(Boolean).join(' · ')||'<i>Nothing available.</i>'}</div>`:''}
+ <h2>Members</h2><div style="overflow-x:auto"><table class="t">${M.slice(0,30).map(p=>`<tr><td>${GO(esc(p.n),'prof:'+p.id)}</td><td>Lv ${p.lv}</td><td>${g.lead===p.id?'leader':p.gr||'member'}</td><td>${p.pers}</td><td>${mine&&g.me?L(p.gr?'demote':'promote','promote',p.id)+' '+L('remove','kick',p.id):''}</td></tr>`).join('')}</table></div>${M.length>30?'<p class="m">+'+(M.length-30)+' more</p>':''}
+ <h2>Activity</h2><div class="log">${g.feed.map(esc).join('<br>')||'Quiet.'}</div><p>[${GO('Gangs Alley','alley')}]</p>`},
+chat(){const g=gangOf();if(!g)return'<p>Join a gang to use chat. '+GO('Gangs Alley','alley')+'</p>';
+ return`<h2>${esc(g.n)} chat</h2><p class="m">Members are simulated offline with rule-based replies. No AI service or internet is used.</p><div class="box log" id="chatbox" style="max-height:320px">${chatHtml()}</div><p><input id="cm" size="28" maxlength="200" placeholder="say something"> ${L('Send','say')}</p><p class="m">Chat activity: ${[0,1,2].map(x=>S.set.chat===x?'<b>'+['off','normal','chatty'][x]+'</b>':L(['off','normal','chatty'][x],'chatset',x)).join(' · ')}</p><p>[${GO('Gang page','gang:'+g.id)}]</p>`},
+sandbox(){if(!S.set.sandbox)return`<h2>Sandbox</h2><p>Sandbox mode is off. ${L('Turn it on','toggle','sandbox')}</p>`;const c=S.set.cheat,tg=(k,l)=>`<div>${L((c[k]?'☑ ':'☐ ')+l,'ctog',k)}</div>`,inp=(k,l,v)=>`<div>${l} <input id="e_${k}" size="9" value="${v}"></div>`;
+ const opts=[...Object.entries(GEAR).map(([i,g])=>`<option value="g:${i}">${g.n}</option>`),...Object.entries(FOOD).map(([i,g])=>`<option value="f:${i}">${g.n}</option>`),...Object.entries(RATS).map(([i,g])=>`<option value="r:${i}">${g.n}</option>`),...Object.entries(CLOTH).map(([i,g])=>`<option value="c:${i}">${g.n}</option>`)].join('');
+ return`<h2>Sandbox controls</h2><p class="m">Affects your hobo only. NPCs are unaffected.</p><div class="box"><b>Effects</b>${tg('hp','Unlimited health')}${tg('T','Unlimited awake')}${tg('meals','Unlimited meals/food')}${tg('free','Free purchases (cash, points, tokens)')}${tg('reqs','Ignore level / capacity / gang requirements')}<div>${L('Unlimited exploring: '+(S.set.unl?'ON':'OFF'),'toggle','unl')}</div><div>${L('Restore toggle defaults','cheatReset')}</div></div>
+ <div class="box"><b>Edit stats</b>${[['lv','Level',S.lv],['xp','Exp',S.xp],['spd','Speed',S.spd],['pow','Power',S.pow],['str','Strength',S.str],['int','Intelligence',S.int],['beg','Begging',S.beg],['resp','Respect',S.resp],['cash','Cash',S.cash],['bank','Bank',S.bank],['tok','Tokens',S.tok],['pts','Points',S.pts]].map(([k,l,v])=>inp(k,l,v)).join('')}<button data-a="edit">Apply</button></div>
+ <div class="box"><b>Items</b> (gear, food, rats, clothes)<br><select id="gv">${opts}</select> ${L('Add','give','add')} ${L('Remove','give','take')}<br><br>${L('Unlock everything (map, trolly, schools, cages, backpack, clothes, quests)','unlock')}</div><div class="box">${GO('Donator page','don')} · ${GO('Gangs Alley','alley')} · ${GO('Clothing','appear')}</div>`}});
+Object.assign(LOC,{
+toy(){const c=sel('tc','wep'),s=sel('ts','lv'),items=Object.entries(GEAR).filter(([,g])=>g.k===c).sort((a,b)=>s==='p'?a[1].p-b[1].p:a[1].lv-b[1].lv);
+ return`<h2>Toy Store</h2><p class="m">Catalog and prices are approximations.</p><p>${flt('tc',[['wep','Weapons'],['arm','Armor'],['ring','Rings']],'wep')}<br>Sort: ${flt('ts',[['lv','Level'],['p','Price']],'lv')}</p>
+ <div style="overflow-x:auto"><table class="t"><tr><th>Item</th><th>Effect</th><th>Req</th><th>Price</th><th></th></tr>${items.map(([i,g])=>`<tr><td>${g.n}${S.inv[i]?' <span class="m">(own '+S.inv[i]+')</span>':''}<br><span class="m">${rarity(g)}</span></td><td>${g.d}</td><td>Lv ${g.lv}</td><td>${money(g.p)}</td><td>${S.lv<g.lv&&!cz('reqs')?'<span class="m">locked</span>':L('Buy','buy',i)}</td></tr>`).join('')}</table></div><p>Backpack: ${invN()}/${cap()} slots · ${PACK[S.pack]?L('Upgrade ('+money(PACK[S.pack][0])+', Lv '+PACK[S.pack][1]+')','packUp'):'maxed'}</p>`},
+casino(){return`<h2>Casino</h2><p>Coin flip: bet cash, 47% to double it. Cash: ${money(S.cash)}</p><p>Bet <input id="bt" size="8" value="100"> ${L('Flip','bet')}</p><p class="m">Gambling can lose your cash. Respect your piggy bank.</p>`},
+uni(){const ok=S.lv>=20||cz('reqs');return`<h2>University</h2>${ok?`<p>Entry $50,000 ${S.school.uni?'(paid)':''}. Training costs $50 and 10T. Solve the daily puzzle for a bonus score (max 3 re-rolls).</p><p>Puzzle score today: <b>${S.uni.score||'-'}</b> (re-rolls ${S.uni.rr}/3) ${L(S.uni.score?'Re-roll':'Solve','uniRoll')}</p>${[['int','Intelligence'],['str','Strength'],['pow','Power'],['spd','Speed']].map(([t,n])=>`<div>${n}: ${f2(S[t])} ${L('[train]','uniTrain',t)}</div>`).join('')}`:'<p>The University accepts level 20 and above. You are level '+S.lv+'.</p>'}`},
+carn(){return`<h2>Traveling Carnival</h2><p>Ring toss: 100 tokens a try. Prizes: intelligence, cans, tokens, rare points. Tokens: <b>${S.tok.toLocaleString()}</b></p><p>${L('Toss a ring','carn')}</p>`}});
+function portrait(){return av(S.app,110)}
+function render(){const el=document.getElementById('c');
+ if(!S){document.getElementById('top').innerHTML='<b>Alley Wars</b>';el.innerHTML=`<h2>Alley Wars (offline)</h2><p class="m">A private single-player HoboWars-style game. Not affiliated with the original.</p>${note?'<div class="box">'+esc(note)+'</div>':''}<p><input id="nm" placeholder="Character name" maxlength="20"> <button data-a="create">Start</button></p><p>Import a v2 save: <input type="file" id="imp" accept=".json"></p>`;bindImp();return}
+ topbar();let h;const[vw,id]=view.split(':');
+ if(vw==='loc')h=LOC[id]?LOC[id]()+bk():'';else if(vw==='prof'){window._pid=id;h=V.prof()}else if(vw==='gang'){window._gid=+id;h=V.gang()}else h=V[vw]?V[vw]():V.home();
+ el.innerHTML=(note?`<div class="box"><b>${esc(note)}</b></div>`:'')+h;bindImp();const cm=document.getElementById('cm');if(cm&&view==='chat')cm.focus()}
+function bindImp(){const f=document.getElementById('imp');if(!f)return;f.onchange=()=>{const file=f.files[0];if(!file)return;const r=new FileReader();
+ r.onload=()=>{try{const s=validate(JSON.parse(r.result));if(!s)throw 0;S=s;tick();save();note='Save imported.'}catch(e){note='Import rejected: invalid or incompatible (v1 saves are not compatible). Current game unchanged.'}render()};r.readAsText(file)}}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a||a.classList.contains('x'))return;e.preventDefault();const n=a.dataset.a,v=a.dataset.v;
+ if(n==='go'){view=v;note='';render()}
+ else if(n==='sort'){window._srt=v;render()}else if(n==='flt'){const[k,x]=v.split('|');window['_'+k]=x;if(k!=='pg')window._pg=0;render()}else if(n==='search'){const e=document.getElementById('qs');window._q=e?e.value.trim().slice(0,30):'';window._pg=0;render()}else if(n==='fr'){window._fr=+v;render()}else if(n==='rt'){window._rt=v;render()}
+ else if(n==='create'){const i=document.getElementById('nm');act('create',i?i.value:'')}
+ else if(n==='export'){const txt=JSON.stringify(S),fn='alleywars-v2-'+S.name.replace(/[^\w-]/g,'_')+'.json';(window.claude&&claude.use?claude.use('downloads'):Promise.resolve(null)).then(d=>{if(d)return d.save({filename:fn,data:txt}).then(()=>{note='Save exported.';render()}).catch(e=>{note=(e&&e.code==='declined')?'Export cancelled.':'Export failed.';render()});const u=URL.createObjectURL(new Blob([txt],{type:'application/json'})),l=document.createElement('a');l.href=u;l.download=fn;l.click();setTimeout(()=>URL.revokeObjectURL(u),500)})}
+ else act(n,v)});
+setInterval(()=>{if(S){tick();chatTick(Date.now());topbar();if(view==='chat'){const b=document.getElementById('chatbox');if(b)b.innerHTML=chatHtml()}}},1000);
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&S){if(e.target.id==='cm')act('say');else if(e.target.id==='pmt')act('pm',window._pid)}});
+load();render();
 </script></body></html>
