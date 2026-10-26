@@ -1,54 +1,43 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Alley Wars v2 (Offline RPG)</title>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Alley Wars v2 (offline)</title>
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; padding-bottom: 70px; background: #121212; color: #e0e0e0; font: 14px/1.4 -apple-system, BlinkMacSystemFont, Verdana, sans-serif; }
-  a { color: #64b5f6; cursor: pointer; text-decoration: none; }
-  #top { position: sticky; top: 0; background: #1e1e1e; border-bottom: 2px solid #333; padding: 6px 10px; font-size: 12px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-  #top table { width: 100%; border-collapse: collapse; }
-  #top td { vertical-align: top; padding: 2px 4px; }
-  .bar { height: 8px; border: 1px solid #444; background: #222; margin: 2px 0; border-radius: 4px; overflow: hidden; }
-  .bar i { display: block; height: 100%; transition: width 0.2s; }
-  #c { padding: 12px; max-width: 600px; margin: auto; }
-  h2 { font-size: 18px; margin: 10px 0 6px; border-bottom: 1px solid #444; color: #fff; padding-bottom: 4px; }
-  .box { background: #1e1e1e; border: 1px solid #333; padding: 10px; margin: 8px 0; border-radius: 6px; }
-  .col { display: flex; flex-wrap: wrap; gap: 10px; }
-  .col > div { flex: 1; min-width: 140px; }
-  table.t { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0; }
-  .t td, .t th { border: 1px solid #333; padding: 6px; text-align: left; }
-  .t th { background: #252525; }
-  button, input, select { font: inherit; padding: 6px 10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px; margin: 2px 0; }
-  button:active { background: #444; }
-  .g { color: #81c784; } .r { color: #e57373; } .m { color: #999; font-size: 12px; }
-  .grid { display: grid; grid-template-columns: repeat(11, 1fr); gap: 2px; max-width: 330px; margin: 10px auto; }
-  .grid i { aspect-ratio: 1; background: #2a2a2a; font-style: normal; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 2px; }
-  .grid i.v { background: #2e7d32; } .grid i.p { background: #c62828; color: #fff; font-weight: bold; }
-  .log { max-height: 220px; overflow-y: auto; font: 12px/1.3 monospace; background: #0a0a0a; padding: 8px; border-radius: 4px; border: 1px solid #222; }
-  
-  /* Mobile Bottom Navigation Bar */
-  #bnav { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #1a1a1a; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-  .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; font-size: 11px; flex: 1; height: 100%; text-decoration: none; }
-  .nav-item.active { color: #64b5f6; font-weight: bold; }
-  .nav-icon { font-size: 18px; margin-bottom: 2px; }
-  
-  #err-log { position: fixed; top: 0; left: 0; right: 0; background: #b71c1c; color: white; padding: 8px; font-size: 12px; z-index: 9999; display: none; }
-</style>
-</head>
-<body>
+* { box-sizing: border-box; }
+body{margin:0;padding-bottom:65px;background:#fff;color:#111;font:15px/1.4 Verdana,sans-serif}
+a{color:#00e;cursor:pointer}a.x{color:#999;pointer-events:none}
+#top{position:sticky;top:0;background:#ddd;border-bottom:2px solid #111;padding:3px 6px;font-size:12px;z-index:5}
+#top table{width:100%;border-collapse:collapse}#top td{vertical-align:top;padding:0 4px}
+.nav a{display:inline-block;text-align:center;margin-right:10px;font-size:13px}
+.bar{height:7px;border:1px solid #333;background:#eee;margin:2px 0}.bar i{display:block;height:100%}
+#c{padding:8px;max-width:760px;margin:auto}h2{font-size:17px;margin:6px 0;border-bottom:1px solid #999}
+.box{background:#f3f3f3;border:1px solid #bbb;padding:6px;margin:6px 0}
+.col{display:flex;flex-wrap:wrap;gap:14px}.col>div{flex:1;min-width:150px}
+table.t{border-collapse:collapse;width:100%;font-size:13px}.t td,.t th{border:1px solid #ccc;padding:3px;text-align:left}
+button,input,select{font:inherit;padding:3px 7px}.g{color:green}.r{color:#c00}.m{color:#666;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(11,1fr);gap:1px;max-width:340px;margin:6px 0}
+.grid i{aspect-ratio:1;background:#ddd;font-style:normal;font-size:10px;text-align:center}
+.grid i.v{background:#9c9}.grid i.p{background:#c33;color:#fff}
+.log{max-height:260px;overflow:auto;font:12px monospace}
+.t{display:block;overflow-x:auto}
 
+/* Mobile Bottom Navigation Bar */
+#bnav { position: fixed; bottom: 0; left: 0; right: 0; height: 55px; background: #eee; border-top: 2px solid #111; display: flex; justify-content: space-around; align-items: center; z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #111; font-size: 11px; flex: 1; height: 100%; text-decoration: none; font-weight: bold; }
+.nav-item.active { background: #ccc; color: #00e; }
+.nav-icon { font-size: 16px; margin-bottom: 2px; }
+
+#err-log { position: fixed; top: 0; left: 0; right: 0; background: #c00; color: white; padding: 6px; font-size: 12px; z-index: 9999; display: none; }
+</style></head><body>
 <div id="err-log"></div>
 <div id="top"></div>
 <div id="c"></div>
 
-<!-- Mobile Persistent Bottom Navigation Bar -->
+<!-- Mobile Bottom Navigation Bar -->
 <div id="bnav">
   <a class="nav-item" data-a="go" data-v="home"><span class="nav-icon">🏠</span>Home</a>
   <a class="nav-item" data-a="go" data-v="pack"><span class="nav-icon">🎒</span>Backpack</a>
-  <a class="nav-item" data-a="go" data-v="city"><span class="nav-icon">🏙️</span>City Map</a>
+  <a class="nav-item" data-a="go" data-v="city"><span class="nav-icon">🏙️</span>City</a>
   <a class="nav-item" data-a="go" data-v="fight"><span class="nav-icon">👊</span>Fight</a>
   <a class="nav-item" data-a="go" data-v="chat"><span class="nav-icon">💬</span>Gang Chat</a>
 </div>
@@ -56,176 +45,205 @@
 <script>
 'use strict';
 
-// Global Safety Error Handler
 window.onerror = function(msg, url, lineNo) {
   var err = document.getElementById('err-log');
   if(err) {
     err.style.display = 'block';
-    err.innerHTML = '<b>JS Runtime Error:</b> ' + msg + ' (Line ' + lineNo + ')';
+    err.innerHTML = '<b>Runtime Error:</b> ' + msg + ' (Line ' + lineNo + ')';
   }
   return false;
 };
 
-const CONFIG = { KEY: 'alleywars_v2', VER: 2, pop: 100, gridN: 100 };
+/* ===== CONFIG ===== */
+const CONFIG={KEY:'alleywars_v2',VER:2,
+ presets:{classic:{regen:900,reset:86400,turns:100},relaxed:{regen:60,reset:1800,turns:100},accelerated:{regen:10,reset:300,turns:200}},
+ fightT:5,begT:10,mapCost:10,pop:300,gridN:100};
 
-function newState(name) {
-  return {
-    v: CONFIG.VER,
-    name: name || 'Hobo',
-    lv: 1, xp: 0, cash: 50, bank: 100, pts: 5, tok: 100,
-    hp: 20, maxHp: 20, T: 100, turns: 100, cans: 0,
-    spd: 2, pow: 2, str: 2, int: 2, beg: 1.0,
-    pos: { x: 50, y: 50 },
-    inv: {}, eq: { wep: null, arm: null },
-    visited: [], finds: [], log: []
-  };
+/* ===== DATA ===== */
+const G=(n,k,v,p,lv,d,x)=>({n,k,v,p,lv,d,x:x||''});
+const GEAR={
+stick:G('Sturdy Stick','wep',3,30,1,'+3 damage. Better than fists.'),pipe:G('Lead Pipe','wep',10,300,3,'+10 damage.'),
+hammer:G('Claw Hammer','wep',18,900,6,'+18 damage.'),bat:G('Spiked Bat','wep',30,2500,10,'+30 damage.'),
+machete:G('Rusty Machete','wep',55,9000,16,'+55 damage.'),chain:G('Chain Whip','wep',90,30000,24,'+90 damage.'),
+nail:G('Nail Gun Club','wep',140,90000,35,'+140 damage.'),katana:G('Pawnshop Katana','wep',220,300000,50,'+220 damage.'),
+rag:G('Padded Rags','arm',2,30,1,'+2 defense.'),vest:G('Cardboard Vest','arm',8,300,3,'+8 defense.'),
+hubcap:G('Hubcap Plate','arm',16,1200,7,'+16 defense.'),plate:G('Trash-lid Shield','arm',25,2500,10,'+25 defense.'),
+riot:G('Riot Gear','arm',45,9000,16,'+45 defense.'),kevlar:G('Kevlar Rag','arm',80,30000,26,'+80 defense.'),
+scrap:G('Scrap Plate Suit','arm',130,90000,38,'+130 defense.'),titan:G('Titanium Coat','arm',200,300000,50,'+200 defense.'),
+tin:G('Tin Ring','ring',1,100,1,'+5% EXP.','exp'),brass:G('Brass Ring','ring',2,1000,5,'+10% EXP.','exp'),
+silver:G('Silver Ring','ring',4,10000,15,'+20% EXP.','exp'),bring:G('Beggar Ring','ring',2,5000,8,'+10% begging cash.','beg')};
+const PACK=[[500,1],[2500,5],[10000,10],[50000,20],[250000,40]];
+const CLOTH={beanie:{n:'Red Beanie',k:'hat',p:0,c:'#a22'},cap:{n:'Blue Cap',k:'hat',p:200,c:'#25a'},tophat:{n:'Top Hat',k:'hat',p:40,u:'P',c:'#222'},crown:{n:'Paper Crown',k:'hat',p:5000,c:'#eb3'},
+ jacketG:{n:'Green Jacket',k:'top',p:0,c:'#4a8a3a'},hoodie:{n:'Grey Hoodie',k:'top',p:300,c:'#889'},suit:{n:'Thrift Suit',k:'top',p:25,u:'P',c:'#345'},tux:{n:'Fancy Tux',k:'top',p:80,u:'P',d:1,c:'#111'},
+ jeans:{n:'Blue Jeans',k:'pants',p:0,c:'#3b6fb0'},cargo:{n:'Cargo Pants',k:'pants',p:250,c:'#675'},gold:{n:'Gold Slacks',k:'pants',p:60,u:'P',c:'#d4a'},
+ glasses:{n:'Round Glasses',k:'acc',p:150,c:'#222'},scarf:{n:'Woolly Scarf',k:'acc',p:300,c:'#c52'},chain:{n:'Gold Chain',k:'acc',p:50,u:'P',c:'#eb3'},shades:{n:'Shades',k:'acc',p:30,u:'P',c:'#000'}};
+const SKIN=['#f2d0b0','#e9b98f','#c68c5c','#8d5a38','#5a3a24'],HAIRC=['#222','#5a3a1a','#b8862e','#c33','#999'];
+const RATS={sewer:{n:'Sewer Rat',p:200,lv:1,st:[1,1,1],d:'Common and scrappy.'},brown:{n:'Brown Rat',p:1500,lv:5,st:[3,3,3],d:'Quick learner.'},black:{n:'Black Rat',p:8000,lv:12,st:[8,8,8],d:'Bites hard.'},albino:{n:'Albino Rat',p:40000,lv:25,st:[18,18,18],d:'Rare, fast and mean.'},dire:{n:'Dire Rat',p:200000,lv:40,st:[40,40,40],d:'Absurdly huge.'}};
+const RN=['Squeaks','Nibbles','Gus','Fang','Biscuit','Whiskers','Rizzo','Sewer Pete'];
+const PERS=['competitive','casual','joker','veteran','beginner','collector','leader','trash-talker','helpful','quiet','social'],STYLES=['fighter','beggar','trainer','explorer'];
+const GN=[['Rust Belt Rats','rail-yard scrappers'],['Dumpster Dynasty','dumpster-diving clan with attitude'],['Cart Kings','shopping cart racers'],['Midnight Mutts','night owls and stray lovers'],['The Bottle Brigade','recyclers turned enforcers'],['Tin Can Syndicate','can-economy tycoons'],['Soup Line Saints','charity hustlers'],['Alley Cats Anonymous','sneaky and chatty'],['Pavement Poets','beggars with bars'],['Gutter Gods','veteran fighters'],['Lost & Found','newbie-friendly crew'],['Broken Umbrella','rain or shine'],['Hobo Highway','nomads'],['Scrap Metal Mafia','heavy hitters']];
+const GMIN=[1,1,5,8,10,12,15,3,1,20,1,6,9,25],GCOL=['#a52','#385','#c80','#336','#2a7','#778','#a33','#a3a','#269','#555','#6a6','#58c','#c63','#999'];
+const TOP=[['insult',/\b(noob|trash|suck|lame|garbage|stupid|idiot|loser|ez)\b/i],['bye',/\b(bye|gtg|later|cya|night|gn)\b/i],['thanks',/\b(thx|thanks|ty|thank)/i],['greet',/\b(hi|hey|yo|sup|hello|howdy|morning|evening)\b/i],['laugh',/\b(lol|lmao|haha|rofl|lul)\b/i],['war',/\b(war|rival|enemy|vs)\b/i],['rat',/\b(rat|rats|cage|pet)/i],['fight',/\b(fight|fought|battle|beat|won|win|lost|lose|kill|attack)\b/i],['rank',/\b(rank|top|leaderboard|board)/i],['money',/\b(cash|money|broke|rich|token|point|buy|sell|can|cans|price)\b/i],['train',/\b(train|stat|level|lvl|grind|xp|school|intel|speed|power|strength)\b/i],['help',/\b(help|how|what|where|why|\?)/i]];
+const BASE={greet:['hey {me}','yo {me}, whats up','sup {me}','{me} is online, finally','morning {me}','o/ {me}'],thanks:['np','anytime','dont mention it','yw {me}','all good'],
+fight:['anyone fought {rv} lately?','i got {w} wins in total, not bad','what lvl you fighting rn {me}?','dont fight with low life, learn from my mistakes','speed matters more than ppl think'],
+rank:['rank {rk} huh, thats climbing','board has been moving like crazy','i keep slipping on the board ngl','{me} you are rank {rk}, not bad at all'],
+money:['sell cans late, the depot price scales with level','save your cans till you level','im broke af','bank your cash before someone mugs you'],
+train:['primary school till 10, then high school','intel first, trust me','strength cuts damage a lot, armor is cheap','leveling is slow but worth it'],
+rat:['rats are underrated, train speed','my rat bites harder than i do tbh','get a cage first'],war:['{rv} keeps talking, we should hit them','war is on, get your awake up','if {rv} shows up we stack fights'],
+insult:['chill {me}','ok tough guy','say that in the ring','ouch. noted.','watch it'],laugh:['lmao','haha','thats good','lol'],help:['depends, what do you need {me}?','check the toy store, cheap gear helps','you gotta explore for cans, then depot','ask me anything, im around'],bye:['later {me}','cya','gn','take care'],
+any:['true','facts','idk man','fair','yeah','makes sense','hmm','not sure about that one','same','what do you guys think?']};
+const EV={join:['welcome {me}!','new blood, nice','welcome to {gang}, dont be shy'],join2:['welcome {o}','{o} joined, be nice'],win:['gg {me} on beating {o}','nice win vs {o}','{o} got folded'],loss:['{o} got you? run it back','rip, {o} is annoying','heal up {me}'],lvl:['grats on level {lv} {me}','lvl {lv}, lets go'],war:['we won the war vs {rv}!','{rv} got us this round, damn'],don:['thanks for the cash {me}','{me} funding the gang, legend'],
+idle:['anyone fighting?','board is boring today','grinding intel again','who wants to run a gang war','my awake is empty','{rv} are quiet today, suspicious','anyone found good cans?']};
+const FOOD={bread:{n:'Stale Bread',t:5,p:5},soup:{n:'Hot Soup',t:10,p:20},fries:{n:'Cold Fries',t:8,p:10},kfc:{n:'KFC-style Meal',t:15,p:40}};
+const FIND_FOOD=['bread','soup','fries'];
+const QUESTS=[{id:'q1',n:'Buy the city map and take 10 explore steps',ok:s=>s.ct.steps>=10,c:40},
+ {id:'q2',n:'Train at school 5 times',ok:s=>s.ct.trains>=5,c:60},{id:'q3',n:'Beg once at the Corner 7/11',ok:s=>s.ct.begs>=1,c:30},
+ {id:'q4',n:'Win a fight',ok:s=>s.bat.w>=1,c:100},{id:'q5',n:'Sell cans at the Can Depot',ok:s=>s.ct.sold>=1,c:50}];
+const DIST={N:['North Side','#a3a',[['rank','Top Hobos'],['loc:gov','Government House']]],
+W:['West Side','#55d',[['loc:hs','High School'],['loc:uni','University'],['pet','Pet Shop'],['loc:casino','Casino']]],
+E:['East Side','#d22',[['home','Your Living Area'],['mail','Mail Box'],['loc:walmart','WalMart'],['alley','Gangs Alley'],['points','Points Shop'],['don','Donator Status'],['appear','Clothing Stall']]],
+S:['South Side','#2a2',[['loc:ps','Primary School'],['loc:duncan',"Duncan's House"],['loc:toy','Toy Store'],['loc:depot','Can Depot'],['loc:hosp','Hospital'],['loc:board','Message Board'],['loc:corner','Corner 7/11'],['fight','Hobo Meeting Area']]]};
+const SCHOOLS={ps:{n:'Primary School',lo:1,hi:10,cash:0,t:5,fee:20,g:1},hs:{n:'High School',lo:10,hi:20,cash:20,t:10,fee:300,g:2.2}};
+const FN='Dex Mara Jonas Lena Otis Pearl Ruben Tilda Cal Nell Gus Vera Moe Ida Hank Rosa Abe Faye Lou Wren Ned Opal Sid Tess Bo Cora Walt Dot Finn Edie'.split(' ');
+const LN='Ravenhurst Mudge Pike Okafor Brandt Quill Sorensen Dabrowski Tamm Hollis Vance Ng Ferreira Lund Abbott Kessler Rowe Imani Castellan Boggs Yoder Marlow Pruitt Santos'.split(' ');
+const ADJ='Rusty Lucky Greasy Quiet Slick Dusty Mad Lazy Tin Old'.split(' '),NOUN='Pete Bandit Pigeon Duke Nails Sparrow Hawk Mule Biscuit Fox'.split(' ');
+
+/* ===== STATE & UTILS ===== */
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a,rf=(a,b)=>a+Math.random()*(b-a);
+const need=l=>Math.round(56*Math.pow(l,1.6)),mhpOf=l=>20+(l-1)*10;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f2=n=>(+n).toFixed(2),money=n=>'$'+Math.floor(n).toLocaleString();
+const pk=a=>a[rnd(0,a.length-1)];
+function pname(){const r=Math.random();return r<.4?pk(FN)+' '+pk(LN):r<.65?pk(ADJ)+' '+pk(NOUN):r<.85?pk(FN).toLowerCase()+pk(LN).slice(0,3)+rnd(1,99):'The '+pk(NOUN)+' '+rnd(2,9)}
+
+function newState(n){const t=Date.now(),P=CONFIG.presets.relaxed;
+ const st={v:CONFIG.VER,name:n,pack:0,cages:1,rats:[],rat:0,don:0,donP:false,donOn:0,donLog:[],gang:0,gRank:'',gangs:[],chat:[],evq:[],pms:{},wardrobe:{},app:{skin:1,hair:1,hairc:1,beard:1,hat:'',top:'jacketG',pants:'jeans',acc:''},armory:{},uni:{score:0,rr:0},war:{w:0,l:0},invites:[],lastChat:0,id:rnd(1e6,9e6),lv:1,xp:0,cash:10,bank:1000,pts:0,tok:1000,hp:20,T:100,meals:5,tref:0,ptr:0,tokref:0,cans:0,int:2,beg:2.4,resp:0,
+ spd:2,pow:2,str:2,eq:{wep:null,arm:null,ring:null},inv:{},food:{},map:false,trolly:false,gift:false,skip:false,quests:{},school:{},
+ pos:{x:rnd(10,90),y:rnd(10,90)},turns:P.turns,visited:[],finds:[],sales:[],tx:[],bat:{w:0,l:0,lw:null,ll:null},ct:{steps:0,trains:0,begs:0,sold:0},rk:{cur:0,prev:0},
+ set:{pace:'relaxed',sim:1,sandbox:false,protect:true,unl:false,chat:1,cheat:{hp:true,T:true,meals:true,free:true,reqs:true,stats:true}},rt:{rg:t,rs:t,sim:t},log:[],feed:[],mail:1,
+ players:genPop()};st.gangs=genGangs(st.players);return st}
+
+let S=null,view='home',note='',memOnly=false;
+function lg(m,c){if(!S)return;S.log.unshift({t:new Date().toLocaleTimeString(),m,c:c||''});S.log.length=Math.min(S.log.length,150)}
+
+function save(){try{localStorage.setItem(CONFIG.KEY,JSON.stringify(S))}catch(e){memOnly=true}}
+function load(){let raw=null;try{raw=localStorage.getItem(CONFIG.KEY)}catch(e){memOnly=true}
+ if(raw){try{S=JSON.parse(raw);}catch(e){}}
+ if(!S)S=newState('Hobo');}
+
+const cz=k=>!!(S&&S.set.sandbox&&S.set.cheat&&S.set.cheat[k]);
+const don=()=>S&&(S.donP||S.don>Date.now());
+const invN=()=>S?Object.values(S.inv).reduce((a,b)=>a+b,0):0,cap=()=>10+10*S.pack+(don()?10:0),ratCap=()=>S.cages+(don()?2:0);
+const gangOf=()=>S?S.gangs.find(g=>g.id===S.gang):null,members=g=>S?S.players.filter(p=>p.gang===g.id):[];
+const gPower=g=>members(g).reduce((a,p)=>a+p.lv,0)+g.lv*10+(g.me&&S.gang===g.id?S.lv:0);
+const owned=id=>CLOTH[id].p===0||!!(S&&S.wardrobe[id]);
+
+function mkApp(){return{skin:rnd(0,4),hair:rnd(0,3),hairc:rnd(0,4),beard:rnd(0,2),hat:pk(['','','beanie','cap','tophat']),top:pk(['jacketG','hoodie','suit']),pants:pk(['jeans','cargo','gold']),acc:pk(['','','','glasses','scarf','chain','shades'])}}
+function genGangs(P){const G2=GN.map((g,i)=>({id:i+1,n:g[0],c:GCOL[i],th:g[1],lv:rnd(2,14),xp:rnd(0,500),tr:rnd(5e3,5e5),min:GMIN[i],rv:0,wins:rnd(0,30),loss:rnd(0,30),lead:0,me:false,feed:[],hist:'Founded '+rnd(2,12)+' years ago around the old '+pk(['rail yard','docks','bus depot','soup line','parking garage'])+'.'}));
+ G2.forEach((g,i)=>g.rv=G2[(i+rnd(1,G2.length-1))%G2.length].id);P.forEach(p=>{p.gang=0;p.gr=''});
+ const by=P.slice().sort((a,b)=>b.lv-a.lv);G2.forEach(g=>{const l=by.find(p=>!p.gang&&p.lv>=g.min);if(l){l.gang=g.id;if(l.pers==='quiet')l.pers='leader';g.lead=l.id}});
+ P.forEach(p=>{if(p.gang||Math.random()<.2)return;const el=G2.filter(g=>g.min<=p.lv);if(el.length)p.gang=pk(el).id});return G2}
+function mkPlayer(i){const L2=1+Math.floor(Math.pow(Math.random(),2.2)*45),sp=[rf(.5,1.4),rf(.5,1.4),rf(.5,1.4)],b=g=>+(2+(L2-1)*rf(.8,2.2)*g).toFixed(2),t=Date.now();
+ return{id:100000+i*13+rnd(0,12),n:pname(),age:rnd(18,45),sx:pk(['M','M','F','F','N']),pers:pk(PERS),style:pk(STYLES),app:mkApp(),gang:0,gr:'',lv:L2,xp:rnd(0,need(L2)-1),spd:b(sp[0]),pow:b(sp[1]),str:b(sp[2]),wp:rnd(0,L2*3),ar:rnd(0,L2*2),cash:rnd(0,L2*150),w:rnd(0,L2*4),l:rnd(0,L2*4),act:t-rnd(0,36e5),mem:{win:0,loss:0,fav:0,chats:0},hist:[]}}
+function genPop(){const used=new Set(),P=[];for(let i=0;i<CONFIG.pop;i++){const p=mkPlayer(i);let t=0;while(used.has(p.n)&&t++<20)p.n=pname();if(used.has(p.n))p.n+=' '+i;used.add(p.n);P.push(p)}return P}
+
+const PR=()=>CONFIG.presets[S.set.pace];
+function dead(){return S.hp<=0;}
+function rankList(){return S.players.concat([{id:S.id,n:S.name,lv:S.lv,xp:S.xp,spd:S.spd,pow:S.pow,str:S.str,w:S.bat.w,l:S.bat.l,me:1,wp:0,ar:0,cash:S.cash}]).sort((a,b)=>b.lv-a.lv||b.xp-a.xp)}
+const myRank=()=>rankList().findIndex(p=>p.me)+1;
+const canPrice=(L,i)=>Math.max(1,Math.floor((8+.8*Math.min(L,200)+(L>200?(L-200)*.4:0))*(1+Math.min(i,1500)/500)));
+
+function av(a,w){w=w||100;const sk=SKIN[a.skin%5],hc=HAIRC[a.hairc%5],C=id=>id&&CLOTH[id]?CLOTH[id].c:'#0000',th=a.hat==='tophat';
+ return`<svg viewBox="0 0 100 160" width="${w}"><rect x="36" y="95" width="12" height="50" fill="${C(a.pants)}"/><rect x="52" y="95" width="12" height="50" fill="${C(a.pants)}"/><rect x="34" y="145" width="16" height="8" fill="#333"/><rect x="50" y="145" width="16" height="8" fill="#333"/><rect x="30" y="50" width="40" height="45" fill="${C(a.top)}"/><rect x="22" y="52" width="9" height="36" fill="${C(a.top)}"/><rect x="69" y="52" width="9" height="36" fill="${C(a.top)}"/><circle cx="50" cy="28" r="14" fill="${sk}"/>`+
+ (a.hair===1?`<path d="M36 24a14 12 0 0 1 28 0z" fill="${hc}"/>`:a.hair===2?`<path d="M35 26a15 14 0 0 1 30 0v22h-6v-18h-18v18h-6z" fill="${hc}"/>`:a.hair===3?`<rect x="46" y="8" width="8" height="14" fill="${hc}"/>`:'')+
+ (a.beard===1?`<path d="M38 32q12 8 24 0v4q-12 8-24 0z" fill="${hc}" opacity=".5"/>`:a.beard===2?`<path d="M36 28q14 22 28 0v14q-14 14-28 0z" fill="${hc}"/>`:'')+
+ (a.hat?`<rect x="${th?40:36}" y="${th?1:10}" width="${th?20:28}" height="${th?19:10}" fill="${C(a.hat)}"/><rect x="33" y="18" width="34" height="4" fill="${C(a.hat)}"/>`:'')+
+ (a.acc==='glasses'||a.acc==='shades'?`<rect x="38" y="24" width="24" height="5" fill="${C(a.acc)}"/>`:a.acc==='scarf'?`<rect x="36" y="40" width="28" height="8" fill="${C(a.acc)}"/>`:a.acc==='chain'?`<rect x="40" y="52" width="20" height="3" fill="${C(a.acc)}"/>`:'')+'</svg>'}
+
+const L=(l,a,v,x)=>`<a ${x?'class="x"':''} data-a="${a}" data-v="${esc(v==null?'':v)}">${l}</a>`;
+const GO=(l,v)=>L(l,'go',v),bk=()=>`<p>[${GO('Back to City','city')}]</p>`;
+const bar=(v,m,c)=>`<div class="bar"><i style="width:${Math.max(0,Math.min(100,v/m*100))}%;background:${c}"></i></div>`;
+
+function topbar(){
+  if(!S) return;
+  const n=new Date(),mx=mhpOf(S.lv);
+  document.getElementById('top').innerHTML=`<table><tr><td class="nav" style="width:36%"><b>Alley Wars</b></td><td class="m" style="width:20%">${n.toLocaleTimeString()}</td></tr></table>
+ <table><tr><td><b>Cash</b> ${money(S.cash)}<br><b>Bank</b> ${money(S.bank)}<br><b>Points</b> ${S.pts}<br><b>Tokens</b> ${S.tok.toLocaleString()}</td><td><b>Level</b> ${S.lv}<br><b>Life</b> ${Math.round(S.hp/mx*100)}%<br><b>Awake</b> ${S.T}/100<br><b>Turns</b> ${S.turns}</td><td style="width:30%">${bar(S.xp,need(S.lv),'#555')}${bar(S.hp,mx,'#3c3')}${bar(S.T,100,'#f66')}</td></tr></table>`;
 }
 
-let S = null;
-let view = 'home';
-let note = '';
+/* ===== VIEWS ===== */
+const V={
+home(){const mx=mhpOf(S.lv);
+ return`<div class="box"><b>My Hobo</b> · Main · ${GO('Food','food')} · ${GO('Backpack','pack')} · ${GO('Appearance','appear')} · ${GO('Donator','don')}</div>
+ <div class="col"><div>${av(S.app,110)}</div><div style="flex:2"><b>Name:</b> ${esc(S.name)} (${S.id})<br><b>Gang:</b> ${S.gang?S.gang:'None'}<br><b>Level:</b> ${S.lv}<br><b>Exp:</b> ${S.xp}/${need(S.lv)}<br>
+ <b>Life:</b> ${Math.ceil(S.hp)}/${mx}<br><b>Awake:</b> ${S.T}/100<br><b>Cans:</b> ${S.cans}<br><b>Tokens:</b> ${S.tok.toLocaleString()}</div></div>`},
+pack(){return`<h2>Backpack</h2><p>Items in pack: ${invN()}/${cap()}</p>${Object.keys(S.inv).length?Object.keys(S.inv).map(i=>`<div>${GEAR[i].n} x${S.inv[i]}</div>`).join(''):'<i>Empty backpack.</i>'}`},
+city(){return`<h2>City</h2><div class="col"><div><b>Locations</b><br>• ${GO('Hobo Meeting Area','fight')}<br>• ${GO('Can Depot','loc:depot')}<br>• ${GO('Toy Store','loc:toy')}<br>• ${GO('Gangs Alley','alley')}</div></div>`},
+fight(){return`<h2>Hobo Meeting Area</h2><p>Challenge local simulated hobos!</p><div class="box"><button data-a="fight_sim">Battle Random Rival (5 Awake)</button></div>`},
+chat(){return`<h2>Gang Chat</h2><div class="box log"><div>[System] Offline simulation active.</div></div><input id="cm" placeholder="Say something..."><button data-a="say">Send</button>`}
+};
 
-function save() {
-  try { localStorage.setItem(CONFIG.KEY, JSON.stringify(S)); } catch(e){}
-}
+const LOC={
+depot(){return`<h2>Can Depot</h2><p>You have <b>${S.cans}</b> cans.</p><button data-a="sell_cans">Sell All Cans</button>`},
+toy(){return`<h2>Toy Store</h2><p>Buy basic weapons and armor.</p>${Object.entries(GEAR).slice(0,5).map(([id,g])=>`<div>${g.n} ($${g.p}) <button data-a="buy" data-v="${id}">Buy</button></div>`).join('')}`}
+};
 
-function load() {
-  try {
-    var raw = localStorage.getItem(CONFIG.KEY);
-    if(raw) S = JSON.parse(raw);
-  } catch(e){}
-  if(!S) S = newState('Hobo');
-}
-
-function render() {
-  var top = document.getElementById('top');
-  var c = document.getElementById('c');
+function render(){
+  const el=document.getElementById('c');
+  if(!S) load();
+  topbar();
   
-  if(!S) S = newState('Hobo');
-
-  // Top Bar Status
-  top.innerHTML = `
-    <table>
-      <tr>
-        <td><b>${S.name}</b> (Lv ${S.lv})</td>
-        <td style="text-align:right"><b>Cash:</b> $${S.cash} | <b>Bank:</b> $${S.bank}</td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <div class="bar"><i style="width:${(S.hp/S.maxHp)*100}%;background:#4caf50"></i></div>
-          <div style="font-size:10px;display:flex;justify-content:space-between">
-            <span>HP: ${S.hp}/${S.maxHp}</span>
-            <span>Awake: ${S.T}/100</span>
-            <span>Turns: ${S.turns}</span>
-          </div>
-        </td>
-      </tr>
-    </table>
-  `;
-
-  // Update Nav Bar Active Highlights
-  document.querySelectorAll('.nav-item').forEach(function(el) {
-    if(el.getAttribute('data-v') === view) el.classList.add('active');
-    else el.classList.remove('active');
+  // Update Bottom Nav Active Class
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    if(item.getAttribute('data-v') === view) item.classList.add('active');
+    else item.classList.remove('active');
   });
 
-  // Render Views
-  var html = '';
-  if(note) html += `<div class="box" style="border-color:#64b5f6">${note}</div>`;
-
-  if(view === 'home') {
-    html += `
-      <h2>My Hobo Dashboard</h2>
-      <div class="box">
-        <p><b>Level:</b> ${S.lv} (${S.xp} XP)</p>
-        <p><b>Stats:</b> Speed: ${S.spd} | Power: ${S.pow} | Strength: ${S.str}</p>
-        <p><b>Intelligence:</b> ${S.int} | <b>Begging Multiplier:</b> x${S.beg.toFixed(2)}</p>
-      </div>
-      <button data-a="rest">Rest (+20 Awake)</button>
-    `;
-  } else if(view === 'pack') {
-    html += `
-      <h2>Backpack</h2>
-      <div class="box">
-        <p><b>Cans Collected:</b> ${S.cans}</p>
-        <p><b>Points:</b> ${S.pts} | <b>Tokens:</b> ${S.tok}</p>
-      </div>
-    `;
-  } else if(view === 'city') {
-    html += `
-      <h2>City Map</h2>
-      <div class="box">
-        <p>Current Location: (${S.pos.x}, ${S.pos.y})</p>
-        <button data-a="move" data-v="0,-1">North ↑</button><br>
-        <button data-a="move" data-v="-1,0">West ←</button>
-        <button data-a="move" data-v="1,0">East →</button><br>
-        <button data-a="move" data-v="0,1">South ↓</button>
-      </div>
-    `;
-  } else if(view === 'fight') {
-    html += `
-      <h2>Hobo Fights</h2>
-      <div class="box">
-        <p>Challenge local hobos to earn cash and experience!</p>
-        <button data-a="fight_npc">Fight Street Rival (5 Awake)</button>
-      </div>
-    `;
-  } else if(view === 'chat') {
-    html += `
-      <h2>Gang Chat</h2>
-      <div class="box log">
-        <div>[System]: Welcome to Alley Wars Gang Chat.</div>
-        <div>[Big Mike]: Anyone selling cans today?</div>
-      </div>
-      <input type="text" placeholder="Type a message..." style="width:70%">
-      <button>Send</button>
-    `;
-  }
-
-  c.innerHTML = html;
+  let h='';
+  const[vw,id]=view.split(':');
+  if(vw==='loc') h=LOC[id]?LOC[id]()+bk():'';
+  else h=V[vw]?V[vw]():V.home();
+  
+  el.innerHTML=(note?`<div class="box"><b>${esc(note)}</b></div>`:'')+h;
 }
 
-// Global Robust Event Router
+/* ===== ROBUST EVENT DELEGATION ===== */
 document.addEventListener('click', function(e) {
-  var target = e.target.closest('[data-a]');
+  var target = e.target.closest('[data-a], [data-v], a, button');
   if(!target) return;
 
-  e.preventDefault();
-  var action = target.getAttribute('data-a');
-  var val = target.getAttribute('data-v');
+  var action = target.getAttribute('data-a') || target.dataset.a;
+  var val = target.getAttribute('data-v') || target.dataset.v;
 
   note = '';
 
-  if(action === 'go') {
-    view = val;
-    window.scrollTo(0, 0);
-  } else if(action === 'rest') {
-    S.T = Math.min(100, S.T + 20);
-    note = 'Rested! Awake increased.';
-  } else if(action === 'move') {
-    if(S.turns <= 0) {
-      note = 'No turns left!';
-    } else {
-      var coords = val.split(',').map(Number);
-      S.pos.x += coords[0];
-      S.pos.y += coords[1];
-      S.turns--;
-      if(Math.random() < 0.5) {
-        var found = Math.floor(Math.random() * 5) + 1;
-        S.cans += found;
-        note = 'Moved to (' + S.pos.x + ',' + S.pos.y + ') and found ' + found + ' cans!';
-      } else {
-        note = 'Moved to (' + S.pos.x + ',' + S.pos.y + ').';
-      }
-    }
-  } else if(action === 'fight_npc') {
-    if(S.T < 5) {
-      note = 'Not enough Awake!';
-    } else {
+  if(action === 'go' || (val && !action)) {
+    e.preventDefault();
+    view = val || action;
+    window.scrollTo(0,0);
+    render();
+    return;
+  }
+
+  if(action === 'fight_sim') {
+    if(S.T < 5) note = 'Not enough Awake!';
+    else {
       S.T -= 5;
-      S.xp += 10;
-      S.cash += 15;
-      note = 'Won the fight! Gained 10 XP and $15.';
+      S.xp += 15;
+      S.cash += 20;
+      note = 'Won the battle! +15 XP, +$20';
+    }
+  } else if(action === 'sell_cans') {
+    var payout = S.cans * 5;
+    S.cash += payout;
+    note = 'Sold ' + S.cans + ' cans for $' + payout;
+    S.cans = 0;
+  } else if(action === 'buy' && GEAR[val]) {
+    if(S.cash < GEAR[val].p) note = 'Not enough cash!';
+    else {
+      S.cash -= GEAR[val].p;
+      S.inv[val] = (S.inv[val] || 0) + 1;
+      note = 'Bought ' + GEAR[val].n;
     }
   }
 
@@ -233,9 +251,6 @@ document.addEventListener('click', function(e) {
   render();
 });
 
-// Initialization
 load();
 render();
-</script>
-</body>
-</html>
+</script></body></html>
